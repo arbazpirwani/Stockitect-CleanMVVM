@@ -1,8 +1,8 @@
-import { useState, useCallback, useEffect } from 'react';
-import { searchStocks } from '../api/polygon/stocksApi';
-import { getCachedSearchResults, setCachedSearchResults } from '../utils/caching';
-import { Stock } from '../types/stock';
-import { ApiError } from '../types/api';
+import {useState, useCallback, useEffect, useMemo} from 'react';
+import {searchStocks} from '../api/polygon/stocksApi';
+import {getCachedSearchResults, setCachedSearchResults} from '../utils/caching';
+import {Stock} from '../types/stock';
+import {ApiError} from '../types/api';
 
 /**
  * Hook result for useSearch
@@ -24,9 +24,9 @@ interface UseSearchResult {
     error: ApiError | null;
 
     /**
-     * Function to perform a search
+     * Function to perform a search (with debounce)
      */
-    search: (query: string) => Promise<void>;
+    search: (query: string) => void;
 
     /**
      * Current search query
@@ -40,12 +40,35 @@ interface UseSearchResult {
 }
 
 /**
+ * Utility function to debounce function calls
+ *
+ * @param func Function to debounce
+ * @param delay Delay in milliseconds
+ * @returns Debounced function
+ */
+export const debounce = <T extends (...args: any[]) => any>(
+    func: T,
+    delay: number
+): ((...args: Parameters<T>) => void) => {
+    let timer: NodeJS.Timeout;
+
+    return (...args: Parameters<T>) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => func(...args), delay);
+    };
+};
+
+/**
  * Custom hook for searching stocks
  *
  * @param initialQuery Optional initial search query
+ * @param debounceDelay Optional debounce delay in milliseconds
  * @returns Object with search results and related functions
  */
-export const useSearch = (initialQuery: string = ''): UseSearchResult => {
+export const useSearch = (
+    initialQuery: string = '',
+    debounceDelay: number = 300
+): UseSearchResult => {
     const [results, setResults] = useState<Stock[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<ApiError | null>(null);
@@ -53,9 +76,9 @@ export const useSearch = (initialQuery: string = ''): UseSearchResult => {
     const [hasSearched, setHasSearched] = useState<boolean>(false);
 
     /**
-     * Search for stocks based on query
+     * Search for stocks based on query (without debounce)
      */
-    const search = useCallback(async (searchQuery: string) => {
+    const searchImmediate = useCallback(async (searchQuery: string) => {
         // Don't search for empty queries
         if (!searchQuery || searchQuery.trim() === '') {
             setResults([]);
@@ -98,12 +121,32 @@ export const useSearch = (initialQuery: string = ''): UseSearchResult => {
         }
     }, []);
 
+    /**
+     * Create debounced version of searchImmediate
+     * Using useMemo to prevent recreation on each render
+     */
+    const search = useMemo(
+        () => debounce((searchQuery: string) => {
+            // Handle the promise to avoid TypeScript warning,
+            // but we don't need to do anything with the result
+            searchImmediate(searchQuery).catch(err => {
+                // Error is already handled inside searchImmediate
+                console.log('Search failed silently', err);
+            });
+        }, debounceDelay),
+        [searchImmediate, debounceDelay]
+    );
+
     // Perform initial search if provided
     useEffect(() => {
         if (initialQuery) {
-            search(initialQuery);
+            // Handle the promise to avoid TypeScript warning
+            searchImmediate(initialQuery).catch(err => {
+                // Error is already handled inside searchImmediate
+                console.log('Initial search failed silently', err);
+            });
         }
-    }, [initialQuery, search]);
+    }, [initialQuery, searchImmediate]);
 
     return {
         results,
@@ -112,24 +155,5 @@ export const useSearch = (initialQuery: string = ''): UseSearchResult => {
         search,
         query,
         hasSearched,
-    };
-};
-
-/**
- * Utility function to debounce function calls
- *
- * @param func Function to debounce
- * @param delay Delay in milliseconds
- * @returns Debounced function
- */
-export const debounce = <T extends (...args: any[]) => any>(
-    func: T,
-    delay: number
-): ((...args: Parameters<T>) => void) => {
-    let timer: NodeJS.Timeout;
-
-    return (...args: Parameters<T>) => {
-        clearTimeout(timer);
-        timer = setTimeout(() => func(...args), delay);
     };
 };

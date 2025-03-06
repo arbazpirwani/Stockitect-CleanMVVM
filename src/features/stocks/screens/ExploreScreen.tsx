@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
     View,
     FlatList,
@@ -8,21 +8,21 @@ import {
     ActivityIndicator,
     RefreshControl,
 } from 'react-native';
-import { useTranslation } from 'react-i18next';
-import { colors, typography, spacing } from '../../../theme';
+import {useTranslation} from 'react-i18next';
+import {colors, typography, spacing} from '../../../theme';
 
-import { SearchBar } from '../../../components/molecules/SearchBar';
-import { StockListItem } from '../../../components/molecules/StockListItem';
-import { ErrorView } from '../../../components/molecules/ErrorView';
+import {SearchBar} from '../../../components/molecules/SearchBar';
+import {StockListItem} from '../../../components/molecules/StockListItem';
+import {ErrorView} from '../../../components/molecules/ErrorView';
 
 // Our pagination hook from above
-import { useStocks } from '../../../hooks/useStocks';
+import {useStocks} from '../../../hooks/useStocks';
 
 // If you have a separate "search" hook:
-import { useSearch } from '../../../hooks/useSearch';
+import {useSearch} from '../../../hooks/useSearch';
 
 export const ExploreScreen: React.FC = () => {
-    const { t } = useTranslation();
+    const {t} = useTranslation();
     const [searchQuery, setSearchQuery] = useState('');
 
     // 1) normal paginated stocks
@@ -40,10 +40,17 @@ export const ExploreScreen: React.FC = () => {
         results: searchResults,
         loading: searchLoading,
         error: searchError,
-        //  ...
+        search,
     } = useSearch();
 
-    // Decide if we’re “searching” vs “normal listing”
+    // Trigger search when searchQuery changes
+    useEffect(() => {
+        if (searchQuery.trim()) {
+            search(searchQuery);
+        }
+    }, [searchQuery, search]);
+
+    // Decide if we're "searching" vs "normal listing"
     const isSearchMode = searchQuery.trim().length > 0;
 
     // Combine or pick whichever error is relevant
@@ -51,6 +58,20 @@ export const ExploreScreen: React.FC = () => {
     const combinedLoading = isSearchMode ? searchLoading : stocksLoading;
     // Show search results if searching, else show normal paginated stocks
     const displayedData = isSearchMode ? searchResults : stocks;
+
+    /**
+     * Handle search query change
+     */
+    const handleSearchChange = (text: string) => {
+        setSearchQuery(text);
+    };
+
+    /**
+     * Handle search clear
+     */
+    const handleSearchClear = () => {
+        setSearchQuery('');
+    };
 
     /**
      * If there's an error, show the ErrorView
@@ -62,8 +83,8 @@ export const ExploreScreen: React.FC = () => {
                     <Text style={styles.title}>{t('exploreScreen.title')}</Text>
                     <SearchBar
                         value={searchQuery}
-                        onChangeText={setSearchQuery}
-                        onClear={() => setSearchQuery('')}
+                        onChangeText={handleSearchChange}
+                        onClear={handleSearchClear}
                     />
                 </View>
 
@@ -72,7 +93,7 @@ export const ExploreScreen: React.FC = () => {
                     onRetry={() => {
                         if (isSearchMode) {
                             // Re-run the search for `searchQuery`
-                            // e.g. `useSearch` might have a `search(searchQuery)` function
+                            search(searchQuery);
                         } else {
                             // normal stocks refresh
                             refreshStocks();
@@ -92,8 +113,8 @@ export const ExploreScreen: React.FC = () => {
                 <Text style={styles.title}>{t('exploreScreen.title')}</Text>
                 <SearchBar
                     value={searchQuery}
-                    onChangeText={setSearchQuery}
-                    onClear={() => setSearchQuery('')}
+                    onChangeText={handleSearchChange}
+                    onClear={handleSearchClear}
                     loading={searchLoading}
                 />
             </View>
@@ -101,21 +122,23 @@ export const ExploreScreen: React.FC = () => {
             <FlatList
                 data={displayedData}
                 keyExtractor={(item) => item.ticker}
-                renderItem={({ item }) => <StockListItem stock={item} />}
+                renderItem={({item}) => <StockListItem stock={item}/>}
                 contentContainerStyle={styles.listContent}
                 onEndReachedThreshold={0.5}
                 onEndReached={() => {
-                    if (!isSearchMode) {
+                    if (!isSearchMode && !combinedLoading && hasMore) {
                         loadMore();
                     }
                 }}
                 ListEmptyComponent={() => {
                     // Show nothing while loading the first time, or a placeholder when done
-                    if (combinedLoading) return null;
+                    if (combinedLoading && !displayedData.length) return null;
                     return (
                         <View style={styles.emptyContainer}>
                             <Text style={styles.emptyText}>
-                                {t('exploreScreen.stockListingPlaceholder')}
+                                {isSearchMode
+                                    ? t('exploreScreen.noResults')
+                                    : t('exploreScreen.stockListingPlaceholder')}
                             </Text>
                         </View>
                     );
@@ -124,8 +147,8 @@ export const ExploreScreen: React.FC = () => {
                     // Show spinner if loading more and not in search
                     if (!combinedLoading || isSearchMode) return null;
                     return (
-                        <View style={{ padding: spacing.m }}>
-                            <ActivityIndicator color={colors.primary} />
+                        <View style={{padding: spacing.m}}>
+                            <ActivityIndicator color={colors.primary}/>
                         </View>
                     );
                 }}
@@ -135,7 +158,7 @@ export const ExploreScreen: React.FC = () => {
                         onRefresh={() => {
                             if (isSearchMode) {
                                 // If you want to "refresh" the search,
-                                // you could do useSearch's “search(searchQuery)” again.
+                                search(searchQuery);
                             } else {
                                 refreshStocks();
                             }
