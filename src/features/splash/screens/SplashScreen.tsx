@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { View, Image, Text, StyleSheet } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { useTranslation } from 'react-i18next';
 import { RootStackParamList } from '../../../navigation/types';
 import { colors, typography, spacing } from '../../../theme';
 
@@ -18,6 +19,8 @@ type SplashScreenProps = {
  * Automatically navigates to the LanguageSelection screen after a delay.
  */
 export const SplashScreen: React.FC<SplashScreenProps> = ({ navigation }) => {
+    const { t } = useTranslation();
+
     useEffect(() => {
         // Navigate to the LanguageSelection screen after a delay
         const timer = setTimeout(() => {
@@ -31,11 +34,11 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ navigation }) => {
     return (
         <View style={styles.container}>
             <Image
-                source={require('../../../assets/images/nasdaq-logo.png')}
+                source={require('../../../../assets/images/nasdaq-logo.png')}
                 style={styles.logo}
                 resizeMode="contain"
             />
-            <Text style={styles.developerName}>Developed by Arbaz Pirwani</Text>
+            <Text style={styles.developerName}>{t('developerCredit')}</Text>
         </View>
     );
 };

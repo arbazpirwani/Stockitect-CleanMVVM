@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { colors, typography, spacing } from '../../../theme';
 
 /**
@@ -8,16 +9,18 @@ import { colors, typography, spacing } from '../../../theme';
  * Main screen for displaying and searching Nasdaq stocks.
  */
 export const ExploreScreen: React.FC = () => {
+    const { t } = useTranslation();
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.title}>Explore Stocks</Text>
+                <Text style={styles.title}>{t('exploreScreen.title')}</Text>
                 {/* Search bar will be added here */}
             </View>
 
             <View style={styles.content}>
                 <Text style={styles.placeholder}>
-                    Stock listings will appear here
+                    {t('exploreScreen.stockListingPlaceholder')}
                 </Text>
                 {/* Stock listing will be added here */}
             </View>
