@@ -6,8 +6,11 @@ node_modules/
 /android/build/
 /android/.gradle/
 /android/app/.cxx/
+
 ios/build/
 ios/DerivedData/
+ios/Pods/
+ios/.xcode.env.local
 
 # Android SDK local properties
 /android/local.properties
