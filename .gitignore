@@ -1,0 +1,33 @@
+# Node modules
+node_modules/
+
+# Build outputs and generated files
+/android/app/build/
+/android/build/
+/android/.gradle/
+/android/app/.cxx/
+ios/build/
+ios/DerivedData/
+
+# Android SDK local properties
+/android/local.properties
+
+# IDEs and editors
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# macOS files
+.DS_Store
+
+# Environment files
+.env
+.env.*.local
+
+# Log files and caches
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
