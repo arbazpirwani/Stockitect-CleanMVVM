@@ -1,19 +1,21 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Stock } from '../types/stock';
+import { Stock } from '@/types/stock';
+import { CACHE_KEYS, CACHE_EXPIRATION } from '@/constants';
 
 /**
- * Cache key prefixes
+ * Cached data with metadata
  */
-export const CACHE_KEYS = {
-    STOCKS_PAGE: 'stocks_page_',
-    SEARCH_RESULTS: 'search_results_',
-    LAST_UPDATE: 'last_update_',
-};
+interface CachedData<T> {
+    /**
+     * The data being cached
+     */
+    data: T;
 
-/**
- * Default cache expiration time (30 minutes)
- */
-export const DEFAULT_CACHE_EXPIRATION = 30 * 60 * 1000; // 30 minutes in milliseconds
+    /**
+     * Timestamp when the data was cached
+     */
+    timestamp: number;
+}
 
 /**
  * Cached data with metadata
@@ -39,7 +41,7 @@ interface CachedData<T> {
  */
 export const getCachedData = async <T>(
     key: string,
-    expirationTime: number = DEFAULT_CACHE_EXPIRATION
+    expirationTime: number = CACHE_EXPIRATION.DEFAULT
 ): Promise<T | null> => {
     try {
         const cachedData = await AsyncStorage.getItem(key);
@@ -107,7 +109,7 @@ export const clearCache = async (prefix?: string): Promise<void> => {
  * @returns Cached stocks or null
  */
 export const getCachedStocks = (page: number): Promise<Stock[] | null> => {
-    return getCachedData<Stock[]>(`${CACHE_KEYS.STOCKS_PAGE}${page}`);
+    return getCachedData<Stock[]>(`${CACHE_KEYS.STOCKS_PAGE}${page}`, CACHE_EXPIRATION.STOCKS);
 };
 
 /**

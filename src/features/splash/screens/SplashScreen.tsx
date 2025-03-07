@@ -2,8 +2,9 @@ import React, { useEffect } from 'react';
 import { View, Image, Text, StyleSheet } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useTranslation } from 'react-i18next';
-import { RootStackParamList } from '../../../navigation/types';
-import { colors, typography, spacing } from '../../../theme';
+import { RootStackParamList } from '@/navigation/types';
+import { colors, typography, spacing } from '@/theme';
+import { TIMING, DIMENSIONS } from '@/constants';
 
 /**
  * Props for the SplashScreen component
@@ -25,7 +26,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ navigation }) => {
         // Navigate to the LanguageSelection screen after a delay
         const timer = setTimeout(() => {
             navigation.replace('LanguageSelection');
-        }, 2000);
+        }, TIMING.SPLASH_SCREEN_DURATION);
 
         // Clear the timeout when the component unmounts
         return () => clearTimeout(timer);
@@ -51,8 +52,8 @@ const styles = StyleSheet.create({
         backgroundColor: colors.background,
     },
     logo: {
-        width: 200,
-        height: 100,
+        width: DIMENSIONS.LOGO_WIDTH,
+        height: DIMENSIONS.LOGO_HEIGHT,
     },
     developerName: {
         position: 'absolute',
