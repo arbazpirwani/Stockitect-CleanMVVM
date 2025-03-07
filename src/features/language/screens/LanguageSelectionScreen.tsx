@@ -1,12 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useTranslation } from 'react-i18next';
 import { RootStackParamList } from '@/navigation/types';
 import { colors, typography, spacing } from '@/theme';
 import { Button } from '@/components/atoms/Button';
-import { changeLanguage } from '@/i18n';
-import { SUPPORTED_LANGUAGES } from '@/constants';
+import { useLanguageViewModel } from '@/viewmodels';
 
 /**
  * Props for the LanguageSelectionScreen component
@@ -27,29 +26,18 @@ type Language = 'en' | 'ar';
  */
 export const LanguageSelectionScreen: React.FC<LanguageSelectionScreenProps> = ({ navigation }) => {
     const { t, i18n } = useTranslation();
-    const [selectedLanguage, setSelectedLanguage] = useState<Language>(i18n.language as Language);
-    const [loading, setLoading] = useState(false);
+
+    // Use the ViewModel
+    const { selectedLanguage, loading, setLanguage } = useLanguageViewModel(
+        i18n.language,
+        () => navigation.replace('Explore')
+    );
 
     /**
-     * Handle language selection, save to storage, and update i18n
-     *
-     * @param language The selected language code
+     * Handle language selection
      */
-    const selectLanguage = async (language: Language) => {
-        try {
-            setSelectedLanguage(language);
-            setLoading(true);
-
-            // Change the language using i18n
-            await changeLanguage(language);
-
-            // Navigate to the main app screen
-            navigation.replace('Explore');
-        } catch (error) {
-            console.error('Error changing language:', error);
-        } finally {
-            setLoading(false);
-        }
+    const handleLanguageSelection = async (language: Language) => {
+        await setLanguage(language);
     };
 
     return (
@@ -60,7 +48,7 @@ export const LanguageSelectionScreen: React.FC<LanguageSelectionScreenProps> = (
             <View style={styles.buttonContainer}>
                 <Button
                     title={t('languageSelection.english')}
-                    onPress={() => selectLanguage('en')}
+                    onPress={() => handleLanguageSelection('en')}
                     variant={selectedLanguage === 'en' ? 'primary' : 'outline'}
                     style={styles.button}
                     loading={loading && selectedLanguage === 'en'}
@@ -68,7 +56,7 @@ export const LanguageSelectionScreen: React.FC<LanguageSelectionScreenProps> = (
 
                 <Button
                     title={t('languageSelection.arabic')}
-                    onPress={() => selectLanguage('ar')}
+                    onPress={() => handleLanguageSelection('ar')}
                     variant={selectedLanguage === 'ar' ? 'primary' : 'outline'}
                     style={styles.button}
                     loading={loading && selectedLanguage === 'ar'}
