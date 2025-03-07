@@ -40,3 +40,5 @@ coverage/
 
 # Snapshot files
 **/__snapshots__/
+
+/vendor/bundle/
