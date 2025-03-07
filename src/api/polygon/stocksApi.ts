@@ -2,7 +2,7 @@ import axios, { AxiosError, AxiosInstance } from 'axios';
 import { POLYGON_API_KEY } from '@env';
 import { PolygonTickersResponse, PolygonErrorResponse, ApiError } from '@/types/api';
 import { Stock } from '@/types/stock';
-import { API_BASE_URL, API_CONFIG, ENDPOINTS, STOCK_FILTERS, DEFAULT_PAGE_SIZE } from '@/constants';
+import { API_BASE_URL, API_CONFIG, ENDPOINTS, STOCK_FILTERS } from '@/constants';
 
 // Create a configured client.
 function createApiClient(): AxiosInstance {
@@ -14,12 +14,8 @@ function createApiClient(): AxiosInstance {
 }
 
 // Transforms thrown Axios errors into our `ApiError`.
+// Transforms thrown Axios errors into our `ApiError`.
 function handleApiError(error: any): never {
-    let apiError: ApiError = {
-        message: 'An unexpected error occurred',
-        originalError: error,
-    };
-
     if (axios.isAxiosError(error)) {
         const axiosError = error as AxiosError<PolygonErrorResponse>;
         if (axiosError.response) {
@@ -27,40 +23,44 @@ function handleApiError(error: any): never {
             const errData = axiosError.response.data;
 
             if (status === 429) {
-                apiError = {
+                throw {
                     message: 'Rate limit exceeded. Please try again later.',
                     code: 'RATE_LIMIT_EXCEEDED',
                     originalError: error,
-                };
+                } as ApiError;
             } else if (status === 401) {
-                apiError = {
+                throw {
                     message: 'Invalid API key. Please check your API key.',
                     code: 'INVALID_API_KEY',
                     originalError: error,
-                };
+                } as ApiError;
             } else if (errData?.error) {
-                apiError = {
+                throw {
                     message: errData.error,
                     code: String(status),
                     originalError: error,
-                };
+                } as ApiError;
             } else {
-                apiError = {
+                throw {
                     message: `API error: ${status}`,
                     code: String(status),
                     originalError: error,
-                };
+                } as ApiError;
             }
         } else if (axiosError.request) {
-            apiError = {
+            throw {
                 message: 'Network error. Please check your internet connection.',
                 code: 'NETWORK_ERROR',
                 originalError: error,
-            };
+            } as ApiError;
         }
     }
 
-    throw apiError;
+    // Default error case
+    throw {
+        message: 'An unexpected error occurred',
+        originalError: error,
+    } as ApiError;
 }
 
 function mapTickerToStock(t: any): Stock {
@@ -75,15 +75,11 @@ function mapTickerToStock(t: any): Stock {
 }
 
 /**
- * Fetch a paginated list of stocks from the NASDAQ exchange
+ * Fetch a list of stocks from the NASDAQ exchange
  */
-export async function fetchStocks(
-    page: number = 1,
-    limit: number = DEFAULT_PAGE_SIZE
-): Promise<Stock[]> {
+export async function fetchStocks(limit: number = 50): Promise<Stock[]> {
     try {
         const client = createApiClient();
-        const offset = (page - 1) * limit;
 
         const response = await client.get<PolygonTickersResponse>(ENDPOINTS.TICKERS, {
             params: {
@@ -93,12 +89,11 @@ export async function fetchStocks(
                 sort: STOCK_FILTERS.SORT,
                 order: STOCK_FILTERS.SORT_ORDER,
                 limit,
-                offset,
+                // No offset parameter since we're not paginating
                 apiKey: POLYGON_API_KEY,
             },
         });
 
-        // response.data.results might be empty if you have free-tier restrictions
         return response.data.results.map(mapTickerToStock);
     } catch (error) {
         return handleApiError(error);
@@ -106,9 +101,9 @@ export async function fetchStocks(
 }
 
 /**
- * Optionally, a search function if you want to do search-based queries
+ * Search for stocks by query
  */
-export async function searchStocks(query: string, limit: number = DEFAULT_PAGE_SIZE): Promise<Stock[]> {
+export async function searchStocks(query: string, limit: number = 50): Promise<Stock[]> {
     if (!query.trim()) {
         return [];
     }

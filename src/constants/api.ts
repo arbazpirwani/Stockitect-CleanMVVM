@@ -26,4 +26,4 @@ export const STOCK_FILTERS = {
 };
 
 // Page size for stock listings
-export const DEFAULT_PAGE_SIZE = 20;
+export const DEFAULT_BATCH_SIZE = 50;

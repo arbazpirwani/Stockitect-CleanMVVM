@@ -26,12 +26,10 @@ export const ExploreScreen: React.FC = () => {
         displayedStocks,
         isLoading,
         error,
-        hasMoreStocks,
         isSearchMode,
         searchQuery,
         hasSearched,
 
-        loadMore,
         refreshStocks,
         searchStocks,
         clearSearch
@@ -92,12 +90,6 @@ export const ExploreScreen: React.FC = () => {
                 keyExtractor={(item) => item.ticker}
                 renderItem={({item}) => <StockListItem stock={item}/>}
                 contentContainerStyle={styles.listContent}
-                onEndReachedThreshold={0.5}
-                onEndReached={() => {
-                    if (!isSearchMode && !isLoading && hasMoreStocks) {
-                        loadMore();
-                    }
-                }}
                 ListEmptyComponent={() => {
                     // Show nothing while loading the first time, or a placeholder when done
                     if (isLoading && !displayedStocks.length) return null;
@@ -112,8 +104,8 @@ export const ExploreScreen: React.FC = () => {
                     );
                 }}
                 ListFooterComponent={() => {
-                    // Show spinner if loading more and not in search
-                    if (!isLoading || isSearchMode) return null;
+                    // Show spinner if loading
+                    if (!isLoading) return null;
                     return (
                         <View style={{padding: spacing.m}}>
                             <ActivityIndicator color={colors.primary}/>
@@ -138,6 +130,7 @@ export const ExploreScreen: React.FC = () => {
     );
 };
 
+// Styles remain the same
 const styles = StyleSheet.create({
     container: {
         flex: 1,

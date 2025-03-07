@@ -2,39 +2,40 @@ import { Stock } from '@/types/stock';
 import { ApiError } from '@/types/api';
 import { fetchStocks, searchStocks } from '@/api/polygon/stocksApi';
 import {
-    getCachedStocks,
-    setCachedStocks,
+    getCachedData,
+    setCachedData,
     getCachedSearchResults,
     setCachedSearchResults
 } from '@/utils/caching';
-import { DEFAULT_PAGE_SIZE } from '@/constants';
+import { CACHE_KEYS } from '@/constants';
+
+import { DEFAULT_BATCH_SIZE } from '@/constants';
 
 /**
  * Repository for managing stock data
  */
 export class StocksRepository {
     /**
-     * Fetch a paginated list of stocks
+     * Fetch stocks from Nasdaq
      *
-     * @param page Page number (starts at 1)
-     * @param pageSize Number of items per page
+     * @param limit Number of items to fetch
      * @returns Promise with stocks array
      * @throws ApiError if the API request fails
      */
-    async getStocks(page: number = 1, pageSize: number = DEFAULT_PAGE_SIZE): Promise<Stock[]> {
+    async getStocks(limit: number = DEFAULT_BATCH_SIZE): Promise<Stock[]> {
         try {
             // Try to get from cache first
-            const cachedStocks = await getCachedStocks(page);
+            const cachedStocks = await getCachedData<Stock[]>(CACHE_KEYS.STOCKS_LIST);
             if (cachedStocks && cachedStocks.length > 0) {
                 return cachedStocks;
             }
 
             // Fetch from API if not in cache
-            const stocks = await fetchStocks(page, pageSize);
+            const stocks = await fetchStocks(limit);
 
             // Cache the results
             if (stocks.length > 0) {
-                await setCachedStocks(page, stocks);
+                await setCachedData(CACHE_KEYS.STOCKS_LIST, stocks);
             }
 
             return stocks;
@@ -52,7 +53,7 @@ export class StocksRepository {
      * @returns Promise with stocks array
      * @throws ApiError if the API request fails
      */
-    async searchStocks(query: string, limit: number = DEFAULT_PAGE_SIZE): Promise<Stock[]> {
+    async searchStocks(query: string, limit: number = DEFAULT_BATCH_SIZE): Promise<Stock[]> {
         if (!query || query.trim() === '') {
             return [];
         }
@@ -80,7 +81,7 @@ export class StocksRepository {
     }
 
     /**
-     * Helper method to remove duplicate stocks
+     * Helper method to ensure no duplicate stocks in the array
      *
      * @param stocks Array of stocks
      * @returns Deduplicated array
