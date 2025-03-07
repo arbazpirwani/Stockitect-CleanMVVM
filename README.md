@@ -1,97 +1,174 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# StockitectCleanMVVM
 
-# Getting Started
+A stock market app built using React Native with a clean MVVM architecture. This application displays stocks listed on the Nasdaq exchange, allows users to search for specific stocks, and caches API responses to reduce redundant requests. The project emphasizes scalability, maintainability, and a clear separation of concerns.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+---
 
-## Step 1: Start Metro
+## Table of Contents
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+- [Architecture Overview](#architecture-overview)
+- [Features](#features)
+- [Setup Instructions](#setup-instructions)
+- [Running the Project](#running-the-project)
+- [Testing](#testing)
+- [Screenshots & Demo](#screenshots--demo)
+- [Contributing](#contributing)
+- [License](#license)
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+---
 
-```sh
-# Using npm
-npm start
+## Architecture Overview
 
-# OR using Yarn
-yarn start
-```
+The project follows a structured and scalable architecture:
 
-## Step 2: Build and run your app
+- **MVVM Pattern:**  
+  - **ViewModels:** Encapsulate business logic and state (e.g., `ExploreViewModel`, `LanguageViewModel`).  
+  - **Views:** React Native components (e.g., `SplashScreen`, `ExploreScreen`, `LanguageSelectionScreen`) that observe ViewModel state.
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+- **Repository Pattern:**  
+  - **Repositories:** Abstract data sources and handle API interactions and caching (e.g., `StocksRepository`).
+
+- **Utilities & Helpers:**  
+  - Contains common helper functions and caching utilities.
+
+- **Navigation:**  
+  - Utilizes React Navigation for managing screen transitions.
+
+- **Configuration & Aliases:**  
+  - Custom Babel and TypeScript configurations with path aliases are used for cleaner and more maintainable imports.
+
+---
+
+## Features
+
+- **Splash Screen:**  
+  - Displays the Nasdaq logo and developer credit.
+  - Automatically navigates to the language selection screen after a short delay.
+
+- **Language Selection:**  
+  - Supports multiple languages (English and Arabic).
+  - Implements RTL support for Arabic (layout flips appropriately).
+
+- **Explore Screen:**  
+  - Lists stocks on the Nasdaq exchange, displaying tickers and company names.
+  - Provides live search functionality that updates as the user types.
+  - Supports pull-to-refresh and infinite scrolling.
+
+- **Caching:**  
+  - Caches API responses to minimize redundant requests.
+
+- **Error Handling:**  
+  - Displays error messages with a retry option when API calls fail.
+
+---
+
+## Setup Instructions
+
+1. **Clone the Repository:**
+
+   ```bash
+   git clone <repository-url>
+   cd StockitectCleanMVVM
+
+2. **Install Dependencies:**
+
+   Use npm or yarn:
+
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
+
+3. **Configure Environment Variables:**
+
+    - Copy the example environment file:
+
+      ```bash
+      cp .env.example .env
+      ```
+
+    - Open `.env` and insert your API key:
+
+      ```
+      POLYGON_API_KEY=your_polygon_api_key_here
+      ```
+
+4. **Verify Path Aliases:**
+
+   The project uses path aliases defined in `tsconfig.json` and `babel.config.js`. These aliases include:
+    - `@/` → `src/`
+    - `@components/` → `src/components/`
+    - `@screens/splash/` → `src/features/splash/screens/`
+    - `@screens/language/` → `src/features/language/screens/`
+    - `@screens/stocks/` → `src/features/stocks/screens/`
+    - `@repositories/` → `src/repositories/`
+    - `@viewmodels/` → `src/viewmodels/`
+    - `@api/` → `src/api/`
+    - `@utils/` → `src/utils/`
+    - `@appTypes/` → `src/types/`
+    - `@theme/` → `src/theme/`
+    - `@navigation/` → `src/navigation/`
+    - `@i18n/` → `src/i18n/`
+    - `@assets/` → `assets/`
+
+   Ensure your file imports use these aliases for consistency.
+
+---
+
+## Running the Project
 
 ### Android
 
-```sh
-# Using npm
+```bash
 npm run android
-
-# OR using Yarn
-yarn android
 ```
 
 ### iOS
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
+```bash
 npm run ios
-
-# OR using Yarn
-yarn ios
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+### Start the Metro Bundler
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+```bash
+npm start
+```
 
-## Step 3: Modify your app
+---
 
-Now that you have successfully run the app, let's make changes!
+## Testing
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+Unit tests are written using Jest and React Native Testing Library. To run tests:
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+```bash
+npm test
+```
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+Tests cover components, viewmodels, repositories, and caching utilities.
 
-## Congratulations! :tada:
+---
 
-You've successfully run and modified your React Native App. :partying_face:
+## Screenshots & Demo
 
-### Now what?
+### Screenshots
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+<p align="center">
+  <img src="./assets/screenshots/splash-screen.jpg" width="300" alt="Splash Screen" />
+  <img src="./assets/screenshots/explore-screen.jpg" width="300" alt="Explore Screen" />
+  <img src="./assets/screenshots/language-selection.jpg" width="300" alt="Language Selection" />
+</p>
 
-# Troubleshooting
+### Demo
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+<p align="center">
+  <img src="./assets/demo/demo.gif" width="600" alt="Demo GIF" />
+</p>
 
-# Learn More
 
-To learn more about React Native, take a look at the following resources:
+---
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+## Contributing
+
+Contributions are welcome! Please fork the repository and create a pull request with your changes. Follow the existing coding style and add tests for any new features.
