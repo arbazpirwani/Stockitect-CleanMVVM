@@ -19,6 +19,7 @@ export class StocksRepository {
      * @param page Page number (starts at 1)
      * @param pageSize Number of items per page
      * @returns Promise with stocks array
+     * @throws ApiError if the API request fails
      */
     async getStocks(page: number = 1, pageSize: number = DEFAULT_PAGE_SIZE): Promise<Stock[]> {
         try {
@@ -38,7 +39,8 @@ export class StocksRepository {
 
             return stocks;
         } catch (error) {
-            throw error;
+            // The fetchStocks function already transforms errors to ApiError
+            throw error as ApiError;
         }
     }
 
@@ -48,6 +50,7 @@ export class StocksRepository {
      * @param query Search query
      * @param limit Maximum number of results
      * @returns Promise with stocks array
+     * @throws ApiError if the API request fails
      */
     async searchStocks(query: string, limit: number = DEFAULT_PAGE_SIZE): Promise<Stock[]> {
         if (!query || query.trim() === '') {
@@ -71,7 +74,8 @@ export class StocksRepository {
 
             return results;
         } catch (error) {
-            throw error;
+            // The searchStocks function already transforms errors to ApiError
+            throw error as ApiError;
         }
     }
 
