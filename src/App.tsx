@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { StatusBar, View, ActivityIndicator, StyleSheet } from 'react-native';
-import { AppNavigator } from './navigation/AppNavigator';
-import { colors } from './theme';
-import { initI18n } from './i18n';
+import { AppNavigator } from '@/navigation/AppNavigator';
+import { colors } from '@/theme';
+import { initI18n } from '@/i18n';
 
 /**
  * Main App component

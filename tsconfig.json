@@ -3,6 +3,19 @@
   "compilerOptions": {
     "skipLibCheck": true,
     "types": ["react-native", "jest"],
-    "typeRoots": ["./src/types"]
+    "typeRoots": ["./src/types"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@components/*": ["src/components/*"],
+      "@screens/*": ["src/features/*/screens/*"],
+      "@hooks/*": ["src/hooks/*"],
+      "@api/*": ["src/api/*"],
+      "@utils/*": ["src/utils/*"],
+      "@types/*": ["src/types/*"],
+      "@theme/*": ["src/theme/*"],
+      "@navigation/*": ["src/navigation/*"],
+      "@i18n/*": ["src/i18n/*"]
+    }
   }
 }

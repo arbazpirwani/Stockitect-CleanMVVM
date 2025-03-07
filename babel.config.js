@@ -10,5 +10,24 @@ module.exports = {
         allowUndefined: true,
       },
     ],
+    [
+      'module-resolver',
+      {
+        root: ['./src'],
+        extensions: ['.ios.js', '.android.js', '.js', '.ts', '.tsx', '.json'],
+        alias: {
+          '@': './src',
+          '@components': './src/components',
+          '@screens': './src/features',
+          '@hooks': './src/hooks',
+          '@api': './src/api',
+          '@utils': './src/utils',
+          '@types': './src/types',
+          '@theme': './src/theme',
+          '@navigation': './src/navigation',
+          '@i18n': './src/i18n'
+        }
+      }
+    ]
   ],
 };
