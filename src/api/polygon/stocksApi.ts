@@ -1,16 +1,15 @@
 import axios, { AxiosError, AxiosInstance } from 'axios';
 import { POLYGON_API_KEY } from '@env';
-import { PolygonTickersResponse, PolygonErrorResponse, ApiError } from '../../types/api';
-import { Stock } from '../../types/stock';
-
-const BASE_URL = 'https://api.polygon.io';
+import { PolygonTickersResponse, PolygonErrorResponse, ApiError } from '@/types/api';
+import { Stock } from '@/types/stock';
+import { API_BASE_URL, API_CONFIG, ENDPOINTS, STOCK_FILTERS, DEFAULT_PAGE_SIZE } from '@/constants';
 
 // Create a configured client.
 function createApiClient(): AxiosInstance {
     return axios.create({
-        baseURL: BASE_URL,
-        timeout: 10000,
-        headers: { 'Content-Type': 'application/json' },
+        baseURL: API_BASE_URL,
+        timeout: API_CONFIG.TIMEOUT,
+        headers: { 'Content-Type': API_CONFIG.CONTENT_TYPE },
     });
 }
 
@@ -80,19 +79,19 @@ function mapTickerToStock(t: any): Stock {
  */
 export async function fetchStocks(
     page: number = 1,
-    limit: number = 20
+    limit: number = DEFAULT_PAGE_SIZE
 ): Promise<Stock[]> {
     try {
         const client = createApiClient();
         const offset = (page - 1) * limit;
 
-        const response = await client.get<PolygonTickersResponse>('/v3/reference/tickers', {
+        const response = await client.get<PolygonTickersResponse>(ENDPOINTS.TICKERS, {
             params: {
-                market: 'stocks',
-                exchange: 'XNAS', // <--- "XNAS" is the primary exchange code for Nasdaq
-                active: true,
-                sort: 'ticker',
-                order: 'asc',
+                market: STOCK_FILTERS.MARKET,
+                exchange: STOCK_FILTERS.EXCHANGE,
+                active: STOCK_FILTERS.ACTIVE,
+                sort: STOCK_FILTERS.SORT,
+                order: STOCK_FILTERS.SORT_ORDER,
                 limit,
                 offset,
                 apiKey: POLYGON_API_KEY,
@@ -109,21 +108,21 @@ export async function fetchStocks(
 /**
  * Optionally, a search function if you want to do search-based queries
  */
-export async function searchStocks(query: string, limit: number = 20): Promise<Stock[]> {
+export async function searchStocks(query: string, limit: number = DEFAULT_PAGE_SIZE): Promise<Stock[]> {
     if (!query.trim()) {
         return [];
     }
 
     try {
         const client = createApiClient();
-        const response = await client.get<PolygonTickersResponse>('/v3/reference/tickers', {
+        const response = await client.get<PolygonTickersResponse>(ENDPOINTS.TICKERS, {
             params: {
-                market: 'stocks',
-                exchange: 'XNAS',
-                active: true,
+                market: STOCK_FILTERS.MARKET,
+                exchange: STOCK_FILTERS.EXCHANGE,
+                active: STOCK_FILTERS.ACTIVE,
                 search: query,
-                sort: 'ticker',
-                order: 'asc',
+                sort: STOCK_FILTERS.SORT,
+                order: STOCK_FILTERS.SORT_ORDER,
                 limit,
                 apiKey: POLYGON_API_KEY,
             },

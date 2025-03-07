@@ -18,21 +18,6 @@ interface CachedData<T> {
 }
 
 /**
- * Cached data with metadata
- */
-interface CachedData<T> {
-    /**
-     * The data being cached
-     */
-    data: T;
-
-    /**
-     * Timestamp when the data was cached
-     */
-    timestamp: number;
-}
-
-/**
  * Get data from cache
  *
  * @param key Cache key
@@ -132,7 +117,7 @@ export const setCachedStocks = (page: number, stocks: Stock[]): Promise<void> =>
 export const getCachedSearchResults = (query: string): Promise<Stock[] | null> => {
     // Normalize the query to ensure consistent caching
     const normalizedQuery = query.trim().toLowerCase();
-    return getCachedData<Stock[]>(`${CACHE_KEYS.SEARCH_RESULTS}${normalizedQuery}`);
+    return getCachedData<Stock[]>(`${CACHE_KEYS.SEARCH_RESULTS}${normalizedQuery}`, CACHE_EXPIRATION.SEARCH);
 };
 
 /**

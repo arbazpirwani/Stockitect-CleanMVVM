@@ -1,8 +1,9 @@
 import {useState, useCallback, useEffect, useMemo} from 'react';
-import {searchStocks} from '../api/polygon/stocksApi';
-import {getCachedSearchResults, setCachedSearchResults} from '../utils/caching';
-import {Stock} from '../types/stock';
-import {ApiError} from '../types/api';
+import {searchStocks} from '@/api/polygon/stocksApi';
+import {getCachedSearchResults, setCachedSearchResults} from '@/utils/caching';
+import {Stock} from '@/types/stock';
+import {ApiError} from '@/types/api';
+import { TIMING } from '@/constants';
 
 /**
  * Hook result for useSearch
@@ -67,7 +68,7 @@ export const debounce = <T extends (...args: any[]) => any>(
  */
 export const useSearch = (
     initialQuery: string = '',
-    debounceDelay: number = 300
+    debounceDelay: number = TIMING.DEBOUNCE_DELAY
 ): UseSearchResult => {
     const [results, setResults] = useState<Stock[]>([]);
     const [loading, setLoading] = useState(false);

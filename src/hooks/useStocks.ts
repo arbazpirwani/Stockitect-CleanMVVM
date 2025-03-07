@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { fetchStocks } from '../api/polygon/stocksApi'; // or wherever your fetch is
-import { Stock } from '../types/stock';
-import { ApiError } from '../types/api';
+import { fetchStocks } from '@/api/polygon/stocksApi';
+import { Stock } from '@/types/stock';
+import { ApiError } from '@/types/api';
+import { DEFAULT_PAGE_SIZE } from '@/constants';
 
 /**
  * Return shape for the useStocks hook.
@@ -55,7 +56,7 @@ export interface UseStocksResult {
  */
 export function useStocks(
     initialPage: number = 1,
-    limit: number = 20
+    limit: number = DEFAULT_PAGE_SIZE
 ): UseStocksResult {
     const [stocks, setStocks] = useState<Stock[]>([]);
     const [loading, setLoading] = useState(false);

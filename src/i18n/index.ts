@@ -2,6 +2,7 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import * as RNLocalize from 'react-native-localize';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { SUPPORTED_LANGUAGES, DEFAULTS, CACHE_KEYS } from '@/constants';
 
 // Import translations
 import en from './translations/en';
@@ -25,16 +26,16 @@ const getDeviceLanguage = () => {
         return languageCode === 'ar' ? 'ar' : 'en'; // Fallback to English for any non-Arabic language
     } catch (error) {
         console.error('Error getting device language:', error);
-        return 'en'; // Default to English
+        return DEFAULTS.LANGUAGE; // Default to English
     }
 };
 
 // Initialize i18next
 const initI18n = async () => {
     // Try to get stored language preference
-    let userLanguage = 'en';
+    let userLanguage = DEFAULTS.LANGUAGE;
     try {
-        const storedLanguage = await AsyncStorage.getItem('userLanguage');
+        const storedLanguage = await AsyncStorage.getItem(CACHE_KEYS.USER_LANGUAGE);
         if (storedLanguage) {
             userLanguage = storedLanguage;
         } else {
@@ -49,7 +50,7 @@ const initI18n = async () => {
         .init({
             resources,
             lng: userLanguage,
-            fallbackLng: 'en',
+            fallbackLng: DEFAULTS.LANGUAGE,
             interpolation: {
                 escapeValue: false // React already escapes values
             }
@@ -63,8 +64,10 @@ const initI18n = async () => {
  * @param language Language code (e.g., 'en', 'ar')
  */
 export const changeLanguage = async (language: string) => {
-    await AsyncStorage.setItem('userLanguage', language);
-    i18n.changeLanguage(language);
+    if (SUPPORTED_LANGUAGES.includes(language)) {
+        await AsyncStorage.setItem(CACHE_KEYS.USER_LANGUAGE, language);
+        i18n.changeLanguage(language);
+    }
 };
 
 export { initI18n };

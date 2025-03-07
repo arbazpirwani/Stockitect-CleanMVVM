@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useTranslation } from 'react-i18next';
-import { RootStackParamList } from '../../../navigation/types';
-import { colors, typography, spacing } from '../../../theme';
-import { Button } from '../../../components/atoms/Button';
-import { changeLanguage } from '../../../i18n';
+import { RootStackParamList } from '@/navigation/types';
+import { colors, typography, spacing } from '@/theme';
+import { Button } from '@/components/atoms/Button';
+import { changeLanguage } from '@/i18n';
+import { SUPPORTED_LANGUAGES } from '@/constants';
 
 /**
  * Props for the LanguageSelectionScreen component
