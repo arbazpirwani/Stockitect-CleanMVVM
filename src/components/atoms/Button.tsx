@@ -1,6 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, ViewStyle, TextStyle } from 'react-native';
-import { colors, typography, spacing, borderRadius, shadows } from '../../theme';
+import { colors, typography, spacing, borderRadius, shadows } from '@/theme';
 
 /**
  * Button component props

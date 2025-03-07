@@ -18,15 +18,18 @@ module.exports = {
         alias: {
           '@': './src',
           '@components': './src/components',
-          '@screens': './src/features',
+          '@screens/splash': './src/features/splash/screens',
+          '@screens/language': './src/features/language/screens',
+          '@screens/stocks': './src/features/stocks/screens',
           '@repositories': './src/repositories',
           '@viewmodels': './src/viewmodels',
           '@api': './src/api',
           '@utils': './src/utils',
-          '@types': './src/types',
+          '@appTypes': './src/types',
           '@theme': './src/theme',
           '@navigation': './src/navigation',
-          '@i18n': './src/i18n'
+          '@i18n': './src/i18n',
+          '@assets': './assets'
         }
       }
     ]

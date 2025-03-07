@@ -1,9 +1,9 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { SplashScreen } from '../features/splash/screens/SplashScreen';
-import { LanguageSelectionScreen } from '../features/language/screens/LanguageSelectionScreen';
-import { ExploreScreen } from '../features/stocks/screens/ExploreScreen';
+import { SplashScreen } from '@screens/splash/SplashScreen';
+import { LanguageSelectionScreen } from '@screens/language/LanguageSelectionScreen';
+import { ExploreScreen } from '@screens/stocks/ExploreScreen';
 import { RootStackParamList } from './types';
 
 /**

@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { colors, typography, spacing } from '../../theme';
-import { Button } from '../atoms/Button';
+import { colors, typography, spacing } from '@/theme';
+import { Button } from '@components/atoms/Button';
 
 /**
  * ErrorView component props

@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useTranslation} from 'react-i18next';
-import {colors, spacing, borderRadius} from '../../theme';
+import {colors, spacing, borderRadius} from '@/theme';
 
 /**
  * SearchBar component props

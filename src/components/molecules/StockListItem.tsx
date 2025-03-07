@@ -1,8 +1,9 @@
 import React, { memo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { colors, typography, spacing, borderRadius, shadows } from '../../theme';
-import { Stock } from '../../types/stock';
+import { colors, typography, spacing, borderRadius, shadows } from '@/theme';
+import { Stock } from '@appTypes/stock';
+
 
 /**
  * StockListItem component props
