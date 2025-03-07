@@ -155,15 +155,15 @@ Tests cover components, viewmodels, repositories, and caching utilities.
 ### Screenshots
 
 <p align="center">
-  <img src="./assets/screenshots/splash-screen.jpg" width="300" alt="Splash Screen" />
-  <img src="./assets/screenshots/explore-screen.jpg" width="300" alt="Explore Screen" />
-  <img src="./assets/screenshots/language-selection.jpg" width="300" alt="Language Selection" />
+  <img src="./assets/screenshots/splash-screen.jpg" width="200" alt="Splash Screen" />
+  <img src="./assets/screenshots/explore-screen.jpg" width="200" alt="Explore Screen" />
+  <img src="./assets/screenshots/language-selection.jpg" width="200" alt="Language Selection" />
 </p>
 
 ### Demo
 
 <p align="center">
-  <img src="./assets/demo/demo.gif" width="600" alt="Demo GIF" />
+  <img src="./assets/demo/demo.gif" width="400" alt="Demo GIF" />
 </p>
 
 
