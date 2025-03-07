@@ -1,9 +1,6 @@
 module.exports = {
   preset: 'react-native',
-  setupFilesAfterEnv: [
-    '@testing-library/jest-native/extend-expect',
-    './jest.setup.js'
-  ],
+  setupFilesAfterEnv: ['@testing-library/jest-native/extend-expect', './jest.setup.js'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@components/(.*)$': '<rootDir>/src/components/$1',
@@ -17,7 +14,7 @@ module.exports = {
     '^@navigation/(.*)$': '<rootDir>/src/navigation/$1',
     '^@i18n/(.*)$': '<rootDir>/src/i18n/$1',
     '^@constants/(.*)$': '<rootDir>/src/constants/$1',
-    '^@env$': '<rootDir>/__mocks__/env.js'
+    '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg)$': '<rootDir>/__mocks__/fileMock.js'
   },
   transform: {
     '^.+\\.tsx?$': ['babel-jest', { configFile: './babel.config.js' }]

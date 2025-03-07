@@ -11,43 +11,54 @@ jest.mock('react-native-localize', () => ({
     removeEventListener: jest.fn(),
 }));
 
-// Fix the NativeAnimatedHelper mock (handled via moduleNameMapper if needed)
-// jest.mock('react-native/Libraries/Animated/NativeAnimatedHelper', () => {
-//     return {
-//         __esModule: true,
-//         default: {
-//             setWaitingForIdentifier: jest.fn(),
-//             unsetWaitingForIdentifier: jest.fn(),
-//         },
-//     };
-// });
+// Stub out image and asset imports are handled via moduleNameMapper in jest.config.js
 
 jest.mock('react-native-vector-icons/Ionicons', () => 'Icon');
 
-// Mock i18next
+// Create a chainable mock for i18next so that .use() returns an object with .init()
+jest.mock('i18next', () => {
+    const chain = {
+        use: function (plugin) {
+            return chain;
+        },
+        init: jest.fn(() => Promise.resolve(chain)),
+        changeLanguage: jest.fn(() => Promise.resolve()),
+        t: (key) => key,
+        language: 'en',
+    };
+    return chain;
+});
+
+// Also, mock react-i18next to use our i18next chain
 jest.mock('react-i18next', () => ({
     useTranslation: () => ({
         t: (key) => key,
         i18n: {
+            changeLanguage: jest.fn(() => Promise.resolve()),
             language: 'en',
-            changeLanguage: jest.fn(),
         },
     }),
 }));
 
-// The '@env' module is now resolved via moduleNameMapper
-
 // Mock navigation
-jest.mock('@react-navigation/native', () => ({
-    useNavigation: () => ({
-        navigate: jest.fn(),
-        replace: jest.fn(),
-    }),
-}));
+jest.mock('@react-navigation/native', () => {
+    const actualNav = jest.requireActual('@react-navigation/native');
+    return {
+        ...actualNav,
+        createNavigatorFactory: () => () => ({
+            Navigator: ({ children }) => children,
+            Screen: ({ children }) => children,
+        }),
+        useNavigation: () => ({
+            navigate: jest.fn(),
+            replace: jest.fn(),
+        }),
+    };
+});
 
 // Silence the warning: Animated: `useNativeDriver` is not supported
 global.console = {
     ...console,
-    // Uncomment below to ignore specific expected warnings:
+    // Optionally, to suppress expected warnings:
     // warn: jest.fn(),
 };
