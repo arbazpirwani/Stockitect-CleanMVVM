@@ -34,3 +34,9 @@ ios/.xcode.env.local
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Coverage folder
+coverage/
+
+# Snapshot files
+**/__snapshots__/

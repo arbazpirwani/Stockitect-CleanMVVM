@@ -7,14 +7,14 @@ module.exports = {
         moduleName: '@env',
         path: '.env',
         safe: false,
-        allowUndefined: true,
-      },
+        allowUndefined: true
+      }
     ],
     [
       'module-resolver',
       {
         root: ['./src'],
-        extensions: ['.ios.js', '.android.js', '.js', '.ts', '.tsx', '.json'],
+        extensions: [".ios.js", ".android.js", ".js", ".ts", ".tsx", ".json"],
         alias: {
           '@': './src',
           '@components': './src/components',
@@ -30,5 +30,5 @@ module.exports = {
         }
       }
     ]
-  ],
+  ]
 };
