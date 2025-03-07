@@ -106,9 +106,18 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             />
 
             {loading ? (
-                <ActivityIndicator size="small" color={colors.primary} style={styles.loadingIndicator}/>
+                <ActivityIndicator
+                    size="small"
+                    color={colors.primary}
+                    style={styles.loadingIndicator}
+                    testID="loading-indicator" // Add this line
+                />
             ) : value.length > 0 ? (
-                <TouchableOpacity onPress={handleClear} style={styles.clearButton}>
+                <TouchableOpacity
+                    onPress={handleClear}
+                    style={styles.clearButton}
+                    testID="clear-button" // Add this line
+                >
                     <Icon name="close-circle" size={16} color={colors.text.secondary}/>
                 </TouchableOpacity>
             ) : null}
