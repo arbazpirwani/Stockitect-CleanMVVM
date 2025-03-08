@@ -19,7 +19,7 @@ export const resources = {
 };
 
 // Get device language
-const getDeviceLanguage = () => {
+export const getDeviceLanguage = () => {
     try {
         const locales = RNLocalize.getLocales();
         const languageCode = locales[0].languageCode;
@@ -30,12 +30,22 @@ const getDeviceLanguage = () => {
     }
 };
 
+// Get saved language from storage
+export const getSavedLanguage = async (): Promise<string | null> => {
+    try {
+        return await AsyncStorage.getItem(CACHE_KEYS.USER_LANGUAGE);
+    } catch (error) {
+        console.error('Error getting saved language:', error);
+        return null;
+    }
+};
+
 // Initialize i18next
-const initI18n = async () => {
+export const initI18n = async () => {
     // Try to get stored language preference
     let userLanguage = DEFAULTS.LANGUAGE;
     try {
-        const storedLanguage = await AsyncStorage.getItem(CACHE_KEYS.USER_LANGUAGE);
+        const storedLanguage = await getSavedLanguage();
         if (storedLanguage) {
             userLanguage = storedLanguage;
         } else {
@@ -70,5 +80,11 @@ export const changeLanguage = async (language: string) => {
     }
 };
 
-export { initI18n };
+// Check if language has been previously selected
+export const hasLanguageBeenSelected = async (): Promise<boolean> => {
+    const savedLanguage = await getSavedLanguage();
+    return savedLanguage !== null;
+};
+
+// Export the i18n instance directly
 export default i18n;

@@ -1,31 +1,34 @@
 import { renderHook, act } from '@testing-library/react-hooks';
+import { I18nManager } from 'react-native';
 import { useLanguageViewModel } from '@/viewmodels/LanguageViewModel';
+import { changeLanguage } from '@/i18n';
+import RNRestart from 'react-native-restart';
 
-// Mock i18next so that changeLanguage resolves successfully
-jest.mock('i18next', () => ({
-    changeLanguage: jest.fn(() => Promise.resolve(true)),
-    language: 'en',
+// Mock I18nManager
+jest.mock('react-native', () => ({
+    I18nManager: {
+        isRTL: false,
+        forceRTL: jest.fn(),
+    },
 }));
 
-// Also ensure that react-i18next is mocked (if needed for other parts of your hook)
-jest.mock('react-i18next', () => ({
-    useTranslation: () => ({
-        i18n: {
-            changeLanguage: jest.fn(() => Promise.resolve(true)),
-        },
-    }),
+// Mock i18n's changeLanguage
+jest.mock('@/i18n', () => ({
+    changeLanguage: jest.fn().mockResolvedValue(undefined),
 }));
 
-// Mock react-native-restart so we can assert that Restart is called when switching to Arabic
+// Mock react-native-restart
 jest.mock('react-native-restart', () => ({
     Restart: jest.fn(),
 }));
 
-import RNRestart from 'react-native-restart';
-
 describe('LanguageViewModel', () => {
     const initialLanguage = 'en';
     const onSuccessMock = jest.fn();
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
 
     it('should return the initial state correctly', () => {
         const { result } = renderHook(() =>
@@ -37,6 +40,9 @@ describe('LanguageViewModel', () => {
     });
 
     it('should update language, call callback, and restart app when setLanguage is invoked with "ar"', async () => {
+        // Setup mock to ensure isRTL is false (different from what we'll set for Arabic)
+        (I18nManager.isRTL as boolean) = false;
+
         const { result } = renderHook(() =>
             useLanguageViewModel(initialLanguage, onSuccessMock)
         );
@@ -45,10 +51,32 @@ describe('LanguageViewModel', () => {
             await result.current.setLanguage('ar');
         });
 
-        expect(result.current.selectedLanguage).toBe('ar');
-        expect(result.current.loading).toBe(false);
-        expect(onSuccessMock).toHaveBeenCalled();
-        // Verify that the app restart was triggered for RTL layout
+        // Verify the mocked functions were called correctly
+        expect(changeLanguage).toHaveBeenCalledWith('ar');
+        expect(I18nManager.forceRTL).toHaveBeenCalledWith(true);
         expect(RNRestart.Restart).toHaveBeenCalled();
+
+        // The following might not be accurate since we're restarting
+        // and the hook execution stops before these state updates
+        expect(result.current.selectedLanguage).toBe('ar');
+    });
+
+    it('should call callback but not restart for same RTL setting', async () => {
+        // If already RTL and choosing Arabic (or vice versa) - no need to restart
+        (I18nManager.isRTL as boolean) = true;
+
+        const { result } = renderHook(() =>
+            useLanguageViewModel(initialLanguage, onSuccessMock)
+        );
+
+        await act(async () => {
+            await result.current.setLanguage('ar'); // 'ar' needs RTL=true, which matches current I18nManager.isRTL
+        });
+
+        expect(changeLanguage).toHaveBeenCalledWith('ar');
+        expect(I18nManager.forceRTL).not.toHaveBeenCalled(); // Should not be called
+        expect(RNRestart.Restart).not.toHaveBeenCalled(); // Should not restart
+        expect(onSuccessMock).toHaveBeenCalled(); // Should call success callback instead
+        expect(result.current.loading).toBe(false);
     });
 });
