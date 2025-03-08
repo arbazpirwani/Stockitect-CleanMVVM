@@ -6,11 +6,14 @@ import { ExploreScreen } from '@/features/stocks/screens/ExploreScreen';
 interface ExploreViewModelMock {
     displayedStocks: Array<{ ticker: string; name: string }>;
     isLoading: boolean;
+    stocksLoadingMore: boolean;
+    stocksPagination: { nextCursor: string | null; hasMore: boolean };
     error: { message: string } | null;
     isSearchMode: boolean;
     searchQuery: string;
     hasSearched: boolean;
     refreshStocks: jest.Mock;
+    loadMoreStocks: jest.Mock;
     searchStocks: jest.Mock;
     clearSearch: jest.Mock;
 }
@@ -21,11 +24,17 @@ const defaultMockViewModel: ExploreViewModelMock = {
         { ticker: 'MSFT', name: 'Microsoft Corporation' },
     ],
     isLoading: false,
+    stocksLoadingMore: false,
+    stocksPagination: {
+        nextCursor: 'test-cursor',
+        hasMore: true
+    },
     error: null,
     isSearchMode: false,
     searchQuery: '',
     hasSearched: false,
     refreshStocks: jest.fn(),
+    loadMoreStocks: jest.fn(),
     searchStocks: jest.fn(),
     clearSearch: jest.fn(),
 };
@@ -66,11 +75,30 @@ describe('ExploreScreen', () => {
         expect(getByText('Test Error')).toBeTruthy();
     });
 
-    // Optional: If you have added a testID (e.g. "refresh-control") to the RefreshControl,
-    // you can uncomment and update the following test.
-    // it('calls refreshStocks on pull-to-refresh', () => {
+    it('renders loading indicator when loading more stocks', () => {
+        mockUseExploreViewModel.stocksLoadingMore = true;
+        const { getByText } = render(<ExploreScreen />);
+        expect(getByText('loading')).toBeTruthy();
+    });
+
+    it('does not show loading indicator for search mode', () => {
+        mockUseExploreViewModel.isSearchMode = true;
+        mockUseExploreViewModel.stocksLoadingMore = true;
+        const { queryByText } = render(<ExploreScreen />);
+        expect(queryByText('loading')).toBeNull();
+    });
+
+    it('does not show loading indicator when no more items', () => {
+        mockUseExploreViewModel.stocksPagination.hasMore = false;
+        mockUseExploreViewModel.stocksLoadingMore = true;
+        const { queryByText } = render(<ExploreScreen />);
+        expect(queryByText('loading')).toBeNull();
+    });
+
+    // Optional: If you have added a testID to the FlatList, you can uncomment and update:
+    // it('calls loadMoreStocks on end reached', () => {
     //   const { getByTestId } = render(<ExploreScreen />);
-    //   fireEvent(getByTestId('refresh-control'), 'refresh');
-    //   expect(mockUseExploreViewModel.refreshStocks).toHaveBeenCalled();
+    //   fireEvent(getByTestId('stocks-list'), 'onEndReached');
+    //   expect(mockUseExploreViewModel.loadMoreStocks).toHaveBeenCalled();
     // });
 });

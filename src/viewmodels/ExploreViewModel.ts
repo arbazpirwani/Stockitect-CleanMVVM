@@ -1,31 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { stocksRepository } from '@/repositories';
 import { Stock } from '@/types/stock';
-import { ApiError } from '@/types/api';
+import { ApiError, PaginationInfo } from '@/types/api';
 import { TIMING } from '@/constants';
-
-/**
- * View state for the Explore screen
- */
-export interface ExploreViewState {
-    // Stock listing state
-    stocks: Stock[];
-    stocksLoading: boolean;
-    stocksError: ApiError | null;
-
-    // Search state
-    searchResults: Stock[];
-    searchQuery: string;
-    searchLoading: boolean;
-    searchError: ApiError | null;
-    hasSearched: boolean;
-
-    // Computed state
-    isSearchMode: boolean;
-    displayedStocks: Stock[];
-    isLoading: boolean;
-    error: ApiError | null;
-}
 
 /**
  * ViewModel for the Explore screen
@@ -34,7 +11,12 @@ export function useExploreViewModel() {
     // Stock listing state
     const [stocks, setStocks] = useState<Stock[]>([]);
     const [stocksLoading, setStocksLoading] = useState(false);
+    const [stocksLoadingMore, setStocksLoadingMore] = useState(false);
     const [stocksError, setStocksError] = useState<ApiError | null>(null);
+    const [stocksPagination, setStocksPagination] = useState<PaginationInfo>({
+        nextCursor: null,
+        hasMore: false
+    });
 
     // Search state
     const [searchResults, setSearchResults] = useState<Stock[]>([]);
@@ -55,17 +37,18 @@ export function useExploreViewModel() {
     const error = isSearchMode ? searchError : stocksError;
 
     /**
-     * Load stocks (no pagination)
+     * Load stocks (initial page)
      */
     const loadStocks = useCallback(async () => {
         setStocksLoading(true);
         setStocksError(null);
 
         try {
-            const newStocks = await stocksRepository.getStocks();
+            const response = await stocksRepository.getStocks();
 
-            // Ensure there are no duplicates (even though the repository should handle this)
-            setStocks(stocksRepository.deduplicateStocks(newStocks));
+            // Ensure there are no duplicates
+            setStocks(stocksRepository.deduplicateStocks(response.stocks));
+            setStocksPagination(response.pagination);
         } catch (error) {
             const apiError = error as ApiError;
             setStocksError(apiError);
@@ -73,6 +56,45 @@ export function useExploreViewModel() {
             setStocksLoading(false);
         }
     }, []);
+
+    /**
+     * Load more stocks (next page)
+     */
+    const loadMoreStocks = useCallback(async () => {
+        // Don't fetch more if already loading, has error, or no more pages
+        if (stocksLoadingMore || stocksError || !stocksPagination.hasMore) {
+            return;
+        }
+
+        setStocksLoadingMore(true);
+
+        try {
+            const response = await stocksRepository.getStocks(
+                undefined,
+                stocksPagination.nextCursor
+            );
+
+            // Append new stocks to existing ones, remove duplicates
+            const updatedStocks = stocksRepository.deduplicateStocks([
+                ...stocks,
+                ...response.stocks
+            ]);
+
+            setStocks(updatedStocks);
+            setStocksPagination(response.pagination);
+        } catch (error) {
+            const apiError = error as ApiError;
+            setStocksError(apiError);
+        } finally {
+            setStocksLoadingMore(false);
+        }
+    }, [
+        stocks,
+        stocksLoadingMore,
+        stocksError,
+        stocksPagination.hasMore,
+        stocksPagination.nextCursor
+    ]);
 
     /**
      * Refresh the stock list
@@ -141,7 +163,9 @@ export function useExploreViewModel() {
         // State
         stocks,
         stocksLoading,
+        stocksLoadingMore,
         stocksError,
+        stocksPagination,
         searchResults,
         searchQuery,
         searchLoading,
@@ -154,6 +178,7 @@ export function useExploreViewModel() {
 
         // Actions
         refreshStocks,
+        loadMoreStocks,
         searchStocks,
         clearSearch
     };

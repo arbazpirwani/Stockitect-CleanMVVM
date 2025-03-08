@@ -9,6 +9,7 @@ export const STORAGE_PREFIX = 'stockitect_';
 export const CACHE_KEYS = {
     STOCKS_PAGE: `${STORAGE_PREFIX}stocks_page_`,
     STOCKS_LIST: `${STORAGE_PREFIX}stocks_list`,
+    STOCKS_NEXT_CURSOR: `${STORAGE_PREFIX}stocks_next_cursor`, // Added for pagination
     SEARCH_RESULTS: `${STORAGE_PREFIX}search_results_`,
     LAST_UPDATE: `${STORAGE_PREFIX}last_update_`,
     USER_LANGUAGE: `${STORAGE_PREFIX}user_language`,

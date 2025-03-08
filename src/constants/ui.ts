@@ -22,3 +22,9 @@ export const DIMENSIONS = {
     LOGO_WIDTH: 200,
     LOGO_HEIGHT: 100,
 };
+
+// Pagination constants
+export const PAGINATION = {
+    END_REACHED_THRESHOLD: 0.5,  // When to trigger loading more data (0-1)
+    MAX_RETRIES: 3,              // Maximum retry attempts for failed pagination
+};

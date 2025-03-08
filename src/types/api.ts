@@ -141,3 +141,18 @@ export interface ApiError {
      */
     originalError?: any;
 }
+
+/**
+ * Pagination info for stock API responses
+ */
+export interface PaginationInfo {
+    /**
+     * Cursor for the next page of results
+     */
+    nextCursor: string | null;
+
+    /**
+     * Whether there are more items to fetch
+     */
+    hasMore: boolean;
+}

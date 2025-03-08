@@ -15,7 +15,7 @@ describe('stocksApi tests with short-circuited rate limiting', () => {
     });
 
     test('fetchStocks: success (no rate limit)', async () => {
-        mock.onGet(new RegExp(`${ENDPOINTS.TICKERS}.*`)).reply(200, {
+        const responseData = {
             results: [
                 {
                     ticker: 'AAPL',
@@ -26,10 +26,16 @@ describe('stocksApi tests with short-circuited rate limiting', () => {
                     currency_name: 'USD',
                 },
             ],
-        });
+            status: 'OK',
+            request_id: 'test-request',
+            count: 1,
+            next_url: 'https://api.polygon.io/v3/reference/tickers?cursor=test-cursor'
+        };
+
+        mock.onGet(new RegExp(`${ENDPOINTS.TICKERS}.*`)).reply(200, responseData);
 
         const result = await fetchStocks(50);
-        expect(result).toEqual([
+        expect(result.stocks).toEqual([
             {
                 ticker: 'AAPL',
                 name: 'Apple Inc.',
@@ -39,6 +45,69 @@ describe('stocksApi tests with short-circuited rate limiting', () => {
                 currency: 'USD',
             },
         ]);
+        expect(result.nextCursor).toBe('test-cursor');
+    });
+
+    test('fetchStocks: with cursor parameter', async () => {
+        const responseData = {
+            results: [
+                {
+                    ticker: 'MSFT',
+                    name: 'Microsoft Corporation',
+                    primary_exchange: 'NASDAQ',
+                    type: 'CS',
+                    market_cap: 1800000000000,
+                    currency_name: 'USD',
+                },
+            ],
+            status: 'OK',
+            request_id: 'test-request-2',
+            count: 1,
+            next_url: 'https://api.polygon.io/v3/reference/tickers?cursor=next-cursor'
+        };
+
+        mock.onGet(new RegExp(`${ENDPOINTS.TICKERS}.*`)).reply(config => {
+            // Verify the cursor was passed in the request
+            const hasCursor = config.params && config.params.cursor === 'test-cursor';
+            return hasCursor ? [200, responseData] : [400, { error: 'Missing cursor' }];
+        });
+
+        const result = await fetchStocks(50, 'test-cursor');
+        expect(result.stocks).toEqual([
+            {
+                ticker: 'MSFT',
+                name: 'Microsoft Corporation',
+                exchange: 'NASDAQ',
+                type: 'CS',
+                marketCap: 1800000000000,
+                currency: 'USD',
+            },
+        ]);
+        expect(result.nextCursor).toBe('next-cursor');
+    });
+
+    test('fetchStocks: handles next_url with special characters in cursor', async () => {
+        const responseData = {
+            results: [
+                {
+                    ticker: 'AAPL',
+                    name: 'Apple Inc.',
+                    primary_exchange: 'NASDAQ',
+                    type: 'CS',
+                    market_cap: 2000000000000,
+                    currency_name: 'USD',
+                },
+            ],
+            status: 'OK',
+            request_id: 'test-request',
+            count: 1,
+            next_url: 'https://api.polygon.io/v3/reference/tickers?cursor=YWN0aXZlPXRydWUmYXA9QUNJQyU3QzMyZWM3OGU0YmViN2Q3YzdjZjU0OGRlNDg5ZjIwZjI3ZDc2ZDc5MzIzMjU5ZjU2YTg1MzFmY2M4NDZhYzJlYWYmYXM9JmRhdGU9MjAyNS0wMy0wOCZleGNoYW5nZT1YTkFTJmxpbWl0PTUwJm1hcmtldD1zdG9ja3Mmb3JkZXI9YXNjJnNvcnQ9dGlja2Vy'
+        };
+
+        mock.onGet(new RegExp(`${ENDPOINTS.TICKERS}.*`)).reply(200, responseData);
+
+        const result = await fetchStocks(50);
+        expect(result.nextCursor).toBe('YWN0aXZlPXRydWUmYXA9QUNJQyU3QzMyZWM3OGU0YmViN2Q3YzdjZjU0OGRlNDg5ZjIwZjI3ZDc2ZDc5MzIzMjU5ZjU2YTg1MzFmY2M4NDZhYzJlYWYmYXM9JmRhdGU9MjAyNS0wMy0wOCZleGNoYW5nZT1YTkFTJmxpbWl0PTUwJm1hcmtldD1zdG9ja3Mmb3JkZXI9YXNjJnNvcnQ9dGlja2Vy');
     });
 
     test('fetchStocks: hits rate limit (429) twice, then succeeds', async () => {
@@ -63,13 +132,16 @@ describe('stocksApi tests with short-circuited rate limiting', () => {
                             currency_name: 'USD',
                         },
                     ],
+                    status: 'OK',
+                    count: 1,
+                    next_url: null
                 },
             ];
         });
 
         const result = await fetchStocks(50);
         expect(attemptCount).toBe(3);
-        expect(result).toEqual([
+        expect(result.stocks).toEqual([
             {
                 ticker: 'AAPL',
                 name: 'Apple Inc.',
@@ -79,6 +151,7 @@ describe('stocksApi tests with short-circuited rate limiting', () => {
                 currency: 'USD',
             },
         ]);
+        expect(result.nextCursor).toBeNull();
     });
 
     test('fetchStocks: fails after max retries (429)', async () => {
@@ -109,6 +182,8 @@ describe('stocksApi tests with short-circuited rate limiting', () => {
                     currency_name: 'USD',
                 },
             ],
+            status: 'OK',
+            count: 1
         });
 
         const result = await searchStocks('apple', 50);

@@ -1,5 +1,6 @@
 import MockAdapter from 'axios-mock-adapter';
 import axiosInstance from '@/api/apiClient';
+import { API_CONFIG } from '@/constants';
 
 describe('apiClient rate limiting', () => {
     let mock: MockAdapter;
@@ -39,18 +40,27 @@ describe('apiClient rate limiting', () => {
         const config = { url: '/test-endpoint', method: 'get' };
         const response = await axiosInstance(config);
 
-        // We no longer check elapsed time, because test mode short-circuits the wait
+        // We should have exactly 3 attempts (one initial + 2 retries = MAX_RETRIES)
         expect(callCount).toBe(3);
         expect(response.data).toEqual(responseData);
     });
 
-    it('should reject after maximum retries on repeated 429 errors', async () => {
-        mock.onGet('/always-429').reply(429, { error: 'Rate limit exceeded' });
+    it('should respect MAX_RETRIES from API_CONFIG', async () => {
+        let callCount = 0;
+
+        // Simulate an endpoint always returning 429
+        mock.onGet('/always-429').reply(() => {
+            callCount++;
+            return [429, { error: 'Rate limit exceeded' }];
+        });
 
         const config = { url: '/always-429', method: 'get' };
 
         await expect(axiosInstance(config)).rejects.toMatchObject({
             response: { status: 429 },
         });
+
+        // Should attempt exactly 1 + MAX_RETRIES times
+        expect(callCount).toBe(1 + API_CONFIG.MAX_RETRIES);
     });
 });

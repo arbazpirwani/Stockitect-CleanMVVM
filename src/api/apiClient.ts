@@ -7,15 +7,13 @@ const axiosInstance = axios.create({
     headers: { 'Content-Type': API_CONFIG.CONTENT_TYPE },
 });
 
-const MAX_RETRIES = 3;
-
 axiosInstance.interceptors.response.use(
     (response: AxiosResponse) => response,
     async (error) => {
         const { config, response } = error;
         if (response && response.status === 429) {
             config.__retryCount = config.__retryCount || 0;
-            if (config.__retryCount < MAX_RETRIES) {
+            if (config.__retryCount < API_CONFIG.MAX_RETRIES) {
                 config.__retryCount += 1;
 
                 // **Short-Circuit** the real delay in test mode
@@ -23,9 +21,9 @@ axiosInstance.interceptors.response.use(
                     // No real waiting:
                     await new Promise<void>((resolve) => setImmediate(resolve));
                 } else {
-                    // Real exponential backoff for normal usage
-                    const delay = 1000 * Math.pow(2, config.__retryCount);
-                    console.warn(`Rate limit reached. Retrying in ${delay} ms...`);
+                    // Real exponential backoff for normal usage with increased delay
+                    const delay = API_CONFIG.RETRY_DELAY_BASE * Math.pow(API_CONFIG.RETRY_DELAY_FACTOR, config.__retryCount);
+                    console.warn(`Rate limit reached. Retrying in ${Math.round(delay/1000)} seconds...`);
                     await new Promise<void>((resolve) => setTimeout(resolve, delay));
                 }
 

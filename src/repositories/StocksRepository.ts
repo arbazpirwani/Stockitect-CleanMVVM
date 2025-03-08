@@ -1,5 +1,5 @@
 import { Stock } from '@/types/stock';
-import { ApiError } from '@/types/api';
+import { ApiError, PaginationInfo } from '@/types/api';
 import { fetchStocks, searchStocks } from '@/api/polygon/stocksApi';
 import {
     getCachedData,
@@ -16,29 +16,52 @@ import { DEFAULT_BATCH_SIZE } from '@/constants';
  */
 export class StocksRepository {
     /**
-     * Fetch stocks from Nasdaq
+     * Fetch stocks from Nasdaq with pagination support
      *
      * @param limit Number of items to fetch
-     * @returns Promise with stocks array
+     * @param cursor Pagination cursor for fetching next page
+     * @returns Promise with stocks array and pagination info
      * @throws ApiError if the API request fails
      */
-    async getStocks(limit: number = DEFAULT_BATCH_SIZE): Promise<Stock[]> {
+    async getStocks(
+        limit: number = DEFAULT_BATCH_SIZE,
+        cursor: string | null = null
+    ): Promise<{ stocks: Stock[]; pagination: PaginationInfo }> {
         try {
-            // Try to get from cache first
-            const cachedStocks = await getCachedData<Stock[]>(CACHE_KEYS.STOCKS_LIST);
-            if (cachedStocks && cachedStocks.length > 0) {
-                return cachedStocks;
+            // For the first page (no cursor), try to get from cache first
+            if (!cursor) {
+                const cachedStocks = await getCachedData<Stock[]>(CACHE_KEYS.STOCKS_LIST);
+                const cachedCursor = await getCachedData<string | null>(CACHE_KEYS.STOCKS_NEXT_CURSOR);
+
+                if (cachedStocks && cachedStocks.length > 0) {
+                    return {
+                        stocks: cachedStocks,
+                        pagination: {
+                            nextCursor: cachedCursor || null,
+                            hasMore: !!cachedCursor
+                        }
+                    };
+                }
             }
 
-            // Fetch from API if not in cache
-            const stocks = await fetchStocks(limit);
+            // Fetch from API if not in cache or fetching next page
+            const { stocks, nextCursor } = await fetchStocks(limit, cursor);
 
-            // Cache the results
-            if (stocks.length > 0) {
+            // Cache the results (only the first page)
+            if (!cursor && stocks.length > 0) {
                 await setCachedData(CACHE_KEYS.STOCKS_LIST, stocks);
+                if (nextCursor) {
+                    await setCachedData(CACHE_KEYS.STOCKS_NEXT_CURSOR, nextCursor);
+                }
             }
 
-            return stocks;
+            return {
+                stocks,
+                pagination: {
+                    nextCursor,
+                    hasMore: !!nextCursor
+                }
+            };
         } catch (error) {
             // The fetchStocks function already transforms errors to ApiError
             throw error as ApiError;

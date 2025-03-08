@@ -3,7 +3,7 @@ import { POLYGON_API_KEY } from '@env';
 import { PolygonTickersResponse, PolygonErrorResponse, ApiError } from '@/types/api';
 import { Stock } from '@/types/stock';
 import { ENDPOINTS, STOCK_FILTERS } from '@/constants';
-import axiosInstance from '@/api/apiClient'; // Updated to use new API client
+import axiosInstance from '@/api/apiClient';
 
 // Transforms thrown Axios errors into our `ApiError`.
 function handleApiError(error: any): never {
@@ -64,22 +64,61 @@ function mapTickerToStock(t: any): Stock {
 }
 
 /**
- * Fetch a list of stocks from the NASDAQ exchange.
+ * Extract cursor from next_url in the API response
+ * @param nextUrl The next_url from the API response
+ * @returns The cursor parameter or null if not found
  */
-export async function fetchStocks(limit: number = 50): Promise<Stock[]> {
+function extractCursorFromUrl(nextUrl: string | undefined): string | null {
+    if (!nextUrl) return null;
+
     try {
+        // Manually extract the cursor parameter using regex
+        const cursorMatch = nextUrl.match(/[?&]cursor=([^&]+)/);
+        if (cursorMatch && cursorMatch[1]) {
+            // Handle URL encoding if needed
+            return decodeURIComponent(cursorMatch[1]);
+        }
+        return null;
+    } catch (error) {
+        console.error('Failed to parse next_url:', error);
+        return null;
+    }
+}
+
+/**
+ * Fetch a list of stocks from the NASDAQ exchange.
+ * @param limit Number of stocks to fetch per page
+ * @param cursor Optional cursor for pagination
+ * @returns Promise with stocks array and pagination info
+ */
+export async function fetchStocks(limit: number = 50, cursor?: string | null): Promise<{
+    stocks: Stock[];
+    nextCursor: string | null;
+}> {
+    try {
+        const params: Record<string, any> = {
+            market: STOCK_FILTERS.MARKET,
+            exchange: STOCK_FILTERS.EXCHANGE,
+            active: STOCK_FILTERS.ACTIVE,
+            sort: STOCK_FILTERS.SORT,
+            order: STOCK_FILTERS.SORT_ORDER,
+            limit,
+            apiKey: POLYGON_API_KEY,
+        };
+
+        // Add cursor for pagination if provided
+        if (cursor) {
+            params.cursor = cursor;
+        }
+
         const response = await axiosInstance.get<PolygonTickersResponse>(ENDPOINTS.TICKERS, {
-            params: {
-                market: STOCK_FILTERS.MARKET,
-                exchange: STOCK_FILTERS.EXCHANGE,
-                active: STOCK_FILTERS.ACTIVE,
-                sort: STOCK_FILTERS.SORT,
-                order: STOCK_FILTERS.SORT_ORDER,
-                limit,
-                apiKey: POLYGON_API_KEY,
-            },
+            params
         });
-        return response.data.results.map(mapTickerToStock);
+
+        const stocks = response.data.results.map(mapTickerToStock);
+        const nextCursor = extractCursorFromUrl(response.data.next_url);
+
+        return { stocks, nextCursor };
     } catch (error) {
         return handleApiError(error);
     }

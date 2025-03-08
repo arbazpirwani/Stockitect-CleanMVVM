@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import {useTranslation} from 'react-i18next';
 import {colors, typography, spacing} from '@/theme';
+import {PAGINATION} from '@/constants';
 
 import {SearchBar} from '@/components/molecules/SearchBar';
 import {StockListItem} from '@/components/molecules/StockListItem';
@@ -25,12 +26,15 @@ export const ExploreScreen: React.FC = () => {
     const {
         displayedStocks,
         isLoading,
+        stocksLoadingMore,
+        stocksPagination,
         error,
         isSearchMode,
         searchQuery,
         hasSearched,
 
         refreshStocks,
+        loadMoreStocks,
         searchStocks,
         clearSearch
     } = useExploreViewModel();
@@ -43,6 +47,14 @@ export const ExploreScreen: React.FC = () => {
     // Handle search clear
     const handleSearchClear = () => {
         clearSearch();
+    };
+
+    // Handle load more when reaching end of list
+    const handleEndReached = () => {
+        // Only load more if not in search mode and there are more items to load
+        if (!isSearchMode && stocksPagination.hasMore) {
+            loadMoreStocks();
+        }
     };
 
     // If there's an error, show the ErrorView
@@ -90,6 +102,8 @@ export const ExploreScreen: React.FC = () => {
                 keyExtractor={(item) => item.ticker}
                 renderItem={({item}) => <StockListItem stock={item}/>}
                 contentContainerStyle={styles.listContent}
+                onEndReached={handleEndReached}
+                onEndReachedThreshold={PAGINATION.END_REACHED_THRESHOLD}
                 ListEmptyComponent={() => {
                     // Show nothing while loading the first time, or a placeholder when done
                     if (isLoading && !displayedStocks.length) return null;
@@ -104,13 +118,20 @@ export const ExploreScreen: React.FC = () => {
                     );
                 }}
                 ListFooterComponent={() => {
-                    // Show spinner if loading
-                    if (!isLoading) return null;
-                    return (
-                        <View style={{padding: spacing.m}}>
-                            <ActivityIndicator color={colors.primary}/>
-                        </View>
-                    );
+                    // Don't show footer for search results or when there are no more items
+                    if (isSearchMode || !stocksPagination.hasMore) return null;
+
+                    // Show spinner if loading more or initial loading
+                    if (stocksLoadingMore || isLoading) {
+                        return (
+                            <View style={styles.footerLoader}>
+                                <ActivityIndicator color={colors.primary}/>
+                                <Text style={styles.loadingText}>{t('loading')}</Text>
+                            </View>
+                        );
+                    }
+
+                    return null;
                 }}
                 refreshControl={
                     <RefreshControl
@@ -130,7 +151,7 @@ export const ExploreScreen: React.FC = () => {
     );
 };
 
-// Styles remain the same
+// Styles
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -161,4 +182,14 @@ const styles = StyleSheet.create({
         color: colors.text.secondary,
         textAlign: 'center',
     },
+    footerLoader: {
+        padding: spacing.m,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    loadingText: {
+        ...typography.caption,
+        color: colors.text.secondary,
+        marginTop: spacing.xs,
+    }
 });

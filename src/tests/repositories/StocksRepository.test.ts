@@ -19,8 +19,12 @@ describe('StocksRepository', () => {
         repository = new StocksRepository();
 
         // Setup default mocks for API calls
-        (stocksApi.fetchStocks as jest.Mock).mockResolvedValue(mockStocks);
+        (stocksApi.fetchStocks as jest.Mock).mockResolvedValue({
+            stocks: mockStocks,
+            nextCursor: 'mock-cursor'
+        });
         (stocksApi.searchStocks as jest.Mock).mockResolvedValue(mockStocks);
+
         // Setup default mocks for caching functions
         (caching.getCachedData as jest.Mock).mockResolvedValue(null); // No cache for getStocks
         (caching.setCachedData as jest.Mock).mockResolvedValue(undefined);
@@ -33,18 +37,36 @@ describe('StocksRepository', () => {
             const result = await repository.getStocks();
 
             expect(caching.getCachedData).toHaveBeenCalled();
-            expect(stocksApi.fetchStocks).toHaveBeenCalledWith(50);
+            expect(stocksApi.fetchStocks).toHaveBeenCalledWith(50, null);
             expect(caching.setCachedData).toHaveBeenCalled();
-            expect(result).toEqual(mockStocks);
+            expect(result.stocks).toEqual(mockStocks);
+            expect(result.pagination.nextCursor).toBe('mock-cursor');
+            expect(result.pagination.hasMore).toBe(true);
         });
 
         it('returns cached data when available', async () => {
-            (caching.getCachedData as jest.Mock).mockResolvedValue(mockStocks);
+            (caching.getCachedData as jest.Mock)
+                .mockImplementation((key: string) => {
+                    if (key.includes('stocks_list')) return mockStocks;
+                    if (key.includes('next_cursor')) return 'cached-cursor';
+                    return null;
+                });
 
             const result = await repository.getStocks();
 
-            expect(result).toEqual(mockStocks);
+            expect(result.stocks).toEqual(mockStocks);
+            expect(result.pagination.nextCursor).toBe('cached-cursor');
+            expect(result.pagination.hasMore).toBe(true);
             expect(stocksApi.fetchStocks).not.toHaveBeenCalled();
+        });
+
+        it('fetches with cursor when loading next page', async () => {
+            const cursor = 'page-2-cursor';
+            await repository.getStocks(50, cursor);
+
+            expect(stocksApi.fetchStocks).toHaveBeenCalledWith(50, cursor);
+            // Should not try to access cache when using cursor
+            expect(caching.getCachedData).not.toHaveBeenCalled();
         });
 
         it('propagates errors from the API', async () => {

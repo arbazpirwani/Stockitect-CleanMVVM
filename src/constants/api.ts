@@ -14,6 +14,9 @@ export const ENDPOINTS = {
 export const API_CONFIG = {
     TIMEOUT: 10000,
     CONTENT_TYPE: 'application/json',
+    MAX_RETRIES: 3,
+    RETRY_DELAY_BASE: 2000, // Increased base delay to 2 seconds
+    RETRY_DELAY_FACTOR: 2.5, // Use a larger factor for more aggressive backoff
 };
 
 // Stock filters

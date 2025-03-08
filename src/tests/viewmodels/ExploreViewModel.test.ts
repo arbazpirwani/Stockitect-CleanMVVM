@@ -21,6 +21,12 @@ const mockStocks = [
     { ticker: 'MSFT', name: 'Microsoft Corporation' },
 ];
 
+// Sample pagination data
+const mockPagination = {
+    nextCursor: 'test-cursor',
+    hasMore: true
+};
+
 describe('ExploreViewModel', () => {
     beforeAll(() => {
         // Use fake timers to simulate debounce delays
@@ -30,7 +36,10 @@ describe('ExploreViewModel', () => {
     beforeEach(() => {
         jest.clearAllMocks();
         // Setup default mocks for repository functions
-        (stocksRepository.getStocks as jest.Mock).mockResolvedValue(mockStocks);
+        (stocksRepository.getStocks as jest.Mock).mockResolvedValue({
+            stocks: mockStocks,
+            pagination: mockPagination
+        });
         (stocksRepository.searchStocks as jest.Mock).mockResolvedValue(mockStocks);
     });
 
@@ -42,6 +51,7 @@ describe('ExploreViewModel', () => {
 
         // Check that stocks have been loaded correctly
         expect(result.current.stocks).toEqual(mockStocks);
+        expect(result.current.stocksPagination).toEqual(mockPagination);
         expect(stocksRepository.getStocks).toHaveBeenCalledTimes(1);
     });
 
@@ -99,5 +109,48 @@ describe('ExploreViewModel', () => {
         expect(result.current.searchQuery).toBe('');
         expect(result.current.hasSearched).toBe(false);
         expect(result.current.searchResults).toEqual([]);
+    });
+
+    it('loads more stocks when loadMoreStocks is called', async () => {
+        // Setup mock for the loadMore call to return different stocks
+        const nextPageStocks = [
+            { ticker: 'GOOG', name: 'Alphabet Inc.' },
+            { ticker: 'AMZN', name: 'Amazon.com Inc.' }
+        ];
+
+        const nextPagination = {
+            nextCursor: 'next-cursor',
+            hasMore: true
+        };
+
+        // First call returns first page, second call returns second page
+        (stocksRepository.getStocks as jest.Mock)
+            .mockResolvedValueOnce({
+                stocks: mockStocks,
+                pagination: mockPagination
+            })
+            .mockResolvedValueOnce({
+                stocks: nextPageStocks,
+                pagination: nextPagination
+            });
+
+        const { result } = renderHook(() => useExploreViewModel());
+
+        // Wait for initial load to complete
+        await waitFor(() => expect(result.current.stocks).toEqual(mockStocks));
+
+        // Call loadMoreStocks
+        act(() => {
+            result.current.loadMoreStocks();
+        });
+
+        // Wait for the load more to complete
+        await waitFor(() => expect(result.current.stocksLoadingMore).toBe(false));
+
+        // Verify the repository was called with the cursor
+        expect(stocksRepository.getStocks).toHaveBeenCalledWith(undefined, 'test-cursor');
+
+        // The original + next page stocks should now be in the state
+        expect(stocksRepository.deduplicateStocks).toHaveBeenCalled();
     });
 });
