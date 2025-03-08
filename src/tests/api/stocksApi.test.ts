@@ -2,6 +2,7 @@ import MockAdapter from 'axios-mock-adapter';
 import axiosInstance from '@/api/apiClient';
 import { fetchStocks, searchStocks } from '@/api/polygon/stocksApi';
 import { ENDPOINTS } from '@/constants';
+import { AxiosError } from 'axios';
 
 describe('stocksApi tests with short-circuited rate limiting', () => {
     let mock: MockAdapter;
@@ -197,5 +198,108 @@ describe('stocksApi tests with short-circuited rate limiting', () => {
                 currency: 'USD',
             },
         ]);
+    });
+
+    // New tests for better coverage
+    test('handleApiError: handles 401 unauthorized error', async () => {
+        mock.onGet(new RegExp(`${ENDPOINTS.TICKERS}.*`)).reply(401, {
+            error: 'Invalid API key'
+        });
+
+        await expect(fetchStocks(50)).rejects.toMatchObject({
+            code: 'INVALID_API_KEY',
+            message: 'Invalid API key. Please check your API key.'
+        });
+    });
+
+    test('handleApiError: handles general API error with message', async () => {
+        mock.onGet(new RegExp(`${ENDPOINTS.TICKERS}.*`)).reply(400, {
+            error: 'Bad request parameter'
+        });
+
+        await expect(fetchStocks(50)).rejects.toMatchObject({
+            code: '400',
+            message: 'Bad request parameter'
+        });
+    });
+
+    test('handleApiError: handles network error', async () => {
+        // Create a properly typed axios error for network errors
+        const axiosNetworkError = new Error('Network Error') as AxiosError;
+        axiosNetworkError.isAxiosError = true;
+        axiosNetworkError.request = {}; // Has request but no response
+        axiosNetworkError.response = undefined;
+
+        // Override axios to throw this custom error
+        mock.onGet(new RegExp(`${ENDPOINTS.TICKERS}.*`)).reply(() => {
+            throw axiosNetworkError;
+        });
+
+        await expect(fetchStocks(50)).rejects.toMatchObject({
+            code: 'NETWORK_ERROR',
+            message: 'Network error. Please check your internet connection.'
+        });
+    });
+
+    test('handleApiError: handles unexpected error', async () => {
+        // Force an unexpected error
+        mock.onGet(new RegExp(`${ENDPOINTS.TICKERS}.*`)).reply(() => {
+            throw new Error('Unexpected error');
+        });
+
+        await expect(fetchStocks(50)).rejects.toMatchObject({
+            message: 'An unexpected error occurred'
+        });
+    });
+
+    test('extractCursorFromUrl: handles null or undefined URL', () => {
+        // This is testing a function that's not exported
+        // We'll test it indirectly through fetchStocks result
+        mock.onGet(new RegExp(`${ENDPOINTS.TICKERS}.*`)).reply(200, {
+            results: [],
+            status: 'OK',
+            count: 0,
+            next_url: undefined
+        });
+
+        return fetchStocks(50).then(result => {
+            expect(result.nextCursor).toBeNull();
+        });
+    });
+
+    test('extractCursorFromUrl: handles URL without cursor parameter', () => {
+        mock.onGet(new RegExp(`${ENDPOINTS.TICKERS}.*`)).reply(200, {
+            results: [],
+            status: 'OK',
+            count: 0,
+            next_url: 'https://api.polygon.io/v3/reference/tickers?other=param'
+        });
+
+        return fetchStocks(50).then(result => {
+            expect(result.nextCursor).toBeNull();
+        });
+    });
+
+    test('extractCursorFromUrl: handles URL decoding errors', () => {
+        // Create URL with invalid encoding that will throw when decoded
+        const badUrl = 'https://api.polygon.io/v3/reference/tickers?cursor=%invalid%';
+
+        mock.onGet(new RegExp(`${ENDPOINTS.TICKERS}.*`)).reply(200, {
+            results: [],
+            status: 'OK',
+            count: 0,
+            next_url: badUrl
+        });
+
+        // Mock console.error to prevent error output in test
+        const originalConsoleError = console.error;
+        console.error = jest.fn();
+
+        return fetchStocks(50).then(result => {
+            expect(result.nextCursor).toBeNull();
+            expect(console.error).toHaveBeenCalled();
+            // Restore console.error
+            console.error = originalConsoleError;
+        });
     });
 });

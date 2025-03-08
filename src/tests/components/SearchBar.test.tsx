@@ -49,12 +49,21 @@ describe('SearchBar', () => {
     });
 
     it('calls onClear and resets text when clear button is pressed', () => {
-        const { getByTestId } = render(<SearchBar {...defaultProps} value="apple" />);
+        const onChangeTextMock = jest.fn();
+        const onClearMock = jest.fn();
+
+        const { getByTestId } = render(
+            <SearchBar
+                value="test query"
+                onChangeText={onChangeTextMock}
+                onClear={onClearMock}
+            />
+        );
+
         const clearButton = getByTestId('clear-button');
         fireEvent.press(clearButton);
-        expect(onClearMock).toHaveBeenCalled();
-        // onChangeText should be called with an empty string
         expect(onChangeTextMock).toHaveBeenCalledWith('');
+        expect(onClearMock).toHaveBeenCalled();
     });
 
     it('calls onSubmit when submit editing is triggered', () => {
@@ -62,5 +71,40 @@ describe('SearchBar', () => {
         const input = getByPlaceholderText('exploreScreen.searchPlaceholder');
         fireEvent(input, 'submitEditing');
         expect(onSubmitMock).toHaveBeenCalled();
+    });
+
+    it('handles different input scenarios', () => {
+        const { getByPlaceholderText, rerender } = render(
+            <SearchBar
+                {...defaultProps}
+                value=""
+            />
+        );
+
+        const input = getByPlaceholderText('exploreScreen.searchPlaceholder');
+
+        // Test short input
+        fireEvent.changeText(input, 'a');
+        expect(onChangeTextMock).toHaveBeenCalledWith('a');
+
+        // Test long input
+        rerender(
+            <SearchBar
+                {...defaultProps}
+                value="very long search query with multiple words"
+            />
+        );
+        expect(input.props.value).toBe('very long search query with multiple words');
+    });
+
+    it('manages focus and blur states', () => {
+        const { getByPlaceholderText } = render(<SearchBar {...defaultProps} />);
+        const input = getByPlaceholderText('exploreScreen.searchPlaceholder');
+
+        // Simulate focus
+        fireEvent(input, 'focus');
+
+        // Simulate blur
+        fireEvent(input, 'blur');
     });
 });

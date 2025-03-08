@@ -2,6 +2,13 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import { ErrorView } from '@/components/molecules/ErrorView';
 
+// Mock react-i18next
+jest.mock('react-i18next', () => ({
+    useTranslation: jest.fn(() => ({
+        t: (key: string) => key
+    })),
+}));
+
 describe('ErrorView', () => {
     const onRetryMock = jest.fn();
     const errorMessage = 'Test error message';
@@ -37,5 +44,57 @@ describe('ErrorView', () => {
         const retryButton = getByText('exploreScreen.retryButton');
         fireEvent.press(retryButton);
         expect(onRetryMock).toHaveBeenCalledTimes(1);
+    });
+
+    // New tests start here
+    it('handles very long error messages', () => {
+        const longErrorMessage = 'A'.repeat(500);
+        const { getByText } = render(
+            <ErrorView
+                message={longErrorMessage}
+                onRetry={onRetryMock}
+            />
+        );
+
+        expect(getByText(longErrorMessage)).toBeTruthy();
+    });
+
+    it('renders with different message configurations', () => {
+        const { getByText, rerender } = render(
+            <ErrorView
+                message="Short error"
+                onRetry={onRetryMock}
+            />
+        );
+
+        // Rerender with a different message
+        rerender(
+            <ErrorView
+                message="Another error message"
+                onRetry={onRetryMock}
+                title="Different Error"
+            />
+        );
+
+        expect(getByText('Another error message')).toBeTruthy();
+        expect(getByText('Different Error')).toBeTruthy();
+    });
+
+    it('handles multiple retry attempts', () => {
+        const { getByText } = render(
+            <ErrorView
+                message={errorMessage}
+                onRetry={onRetryMock}
+            />
+        );
+
+        const retryButton = getByText('exploreScreen.retryButton');
+
+        // Press retry multiple times
+        fireEvent.press(retryButton);
+        fireEvent.press(retryButton);
+        fireEvent.press(retryButton);
+
+        expect(onRetryMock).toHaveBeenCalledTimes(3);
     });
 });

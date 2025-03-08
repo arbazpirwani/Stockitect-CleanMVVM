@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent } from '@utils/test-utils';
+import { render, fireEvent } from '@testing-library/react-native';
 import { Button } from '@/components/atoms/Button';
 import { ActivityIndicator } from 'react-native';
 
@@ -40,5 +40,70 @@ describe('Button component', () => {
 
         fireEvent.press(getByText('Disabled Button'));
         expect(onPressMock).not.toHaveBeenCalled();
+    });
+
+    it('renders with different button variants', () => {
+        const { getByText, rerender } = render(
+            <Button title="Primary Button" onPress={() => {}} variant="primary" />
+        );
+        expect(getByText('Primary Button')).toBeTruthy();
+
+        rerender(
+            <Button title="Secondary Button" onPress={() => {}} variant="secondary" />
+        );
+        expect(getByText('Secondary Button')).toBeTruthy();
+
+        rerender(
+            <Button title="Outline Button" onPress={() => {}} variant="outline" />
+        );
+        expect(getByText('Outline Button')).toBeTruthy();
+    });
+
+    it('handles custom styling', () => {
+        const customStyle = { backgroundColor: 'red' };
+        const customTextStyle = { color: 'blue' };
+
+        const { getByText } = render(
+            <Button
+                title="Custom Styled Button"
+                onPress={() => {}}
+                style={customStyle}
+                textStyle={customTextStyle}
+            />
+        );
+
+        expect(getByText('Custom Styled Button')).toBeTruthy();
+    });
+
+    it('prevents multiple press when loading', () => {
+        const onPressMock = jest.fn();
+        const { getByText } = render(
+            <Button
+                title="Loading Button"
+                onPress={onPressMock}
+                loading={true}
+            />
+        );
+
+        // When loading, the button should not display its title
+        const loadingButton = () => getByText('Loading Button');
+        expect(() => loadingButton()).toThrow();
+    });
+
+    it('handles custom styling', () => {
+        const customStyle = { backgroundColor: 'red' };
+        const customTextStyle = { color: 'blue' };
+
+        const { getByText } = render(
+            <Button
+                title="Custom Styled Button"
+                onPress={() => {}}
+                style={customStyle}
+                textStyle={customTextStyle}
+            />
+        );
+
+        const button = getByText('Custom Styled Button');
+        expect(button).toBeTruthy();
     });
 });

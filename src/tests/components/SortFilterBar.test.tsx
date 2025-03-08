@@ -100,4 +100,44 @@ describe('SortFilterBar', () => {
         fireEvent.press(getByTestId('view-grid'));
         expect(defaultProps.onViewTypeChange).toHaveBeenCalledWith('grid');
     });
+
+    it('renders with alternative initial configurations', () => {
+        const alternativeProps = {
+            ...defaultProps,
+            sortBy: 'name' as const,
+            orderBy: 'desc' as const,
+            viewType: 'grid' as const,
+            limit: 25 as const,
+        };
+
+        const { getByTestId } = render(<SortFilterBar {...alternativeProps} />);
+
+        // Expand the bar
+        fireEvent.press(getByTestId('expand-filter-bar'));
+
+        // Verify initial state reflects alternative props
+        expect(getByTestId('sort-by-name')).toBeTruthy();
+        expect(getByTestId('order-desc')).toBeTruthy();
+        expect(getByTestId('view-grid')).toBeTruthy();
+        expect(getByTestId('limit-25')).toBeTruthy();
+    });
+
+    it('handles multiple interactions in expanded state', () => {
+        const { getByTestId } = render(<SortFilterBar {...defaultProps} />);
+
+        // Expand the bar
+        fireEvent.press(getByTestId('expand-filter-bar'));
+
+        // Change sort
+        fireEvent.press(getByTestId('sort-by-name'));
+        expect(defaultProps.onSortByChange).toHaveBeenCalledWith('name');
+
+        // Change order
+        fireEvent.press(getByTestId('order-desc'));
+        expect(defaultProps.onOrderByChange).toHaveBeenCalledWith('desc');
+
+        // Change view type
+        fireEvent.press(getByTestId('view-grid'));
+        expect(defaultProps.onViewTypeChange).toHaveBeenCalledWith('grid');
+    });
 });

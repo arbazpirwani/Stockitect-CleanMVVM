@@ -35,18 +35,13 @@ src/
 - **Caching** - Smart caching system to reduce redundant API calls
 - **Offline Support** - Basic functionality when offline via cache
 
-## 📱 Screenshots & Demo
+## 📱Demo
 
-### Screenshots
-
-<p align="center">
-  <img src="./assets/screenshots/splash-screen.jpg" width="200" alt="Splash Screen" />
-  <img src="./assets/screenshots/language-selection.jpg" width="200" alt="Language Selection" />
-  <img src="./assets/screenshots/explore-screen.jpg" width="200" alt="Explore Screen" />
-</p>
-
-### Demo
-<p align="center"> <img src="./assets/demo/demo.gif" width="200" alt="Demo GIF" /> </p>
+<div align="center">
+    <img src="./assets/demo/demo1.gif" width="250" alt="Demo GIF 1" style="margin: 0 16px" /> 
+    <img src="./assets/demo/demo2.gif" width="250" alt="Demo GIF 2" style="margin: 0 16px" /> 
+    <img src="./assets/demo/demo3.gif" width="250" alt="Demo GIF 3" style="margin: 0 16px" /> 
+</div>
 
 ## 🛠️ Tech Stack
 
@@ -110,64 +105,44 @@ npx react-native run-android
 
 ## 🧪 Testing
 
-The project includes comprehensive unit tests to ensure reliability. Run the test suite with:
+### Test Statistics
+
+- **Test Suites**: 17 passed (17 total)
+- **Total Tests**: 128 passed (128 total)
+- **Total Test Time**: 2.263 seconds
+
+### Test Coverage
+
+| Module                      | Statements | Branch    | Functions | Lines     | Key Uncovered Lines |
+|:----------------------------|:----------:|:---------:|:---------:|:----------:|:-------------------:|
+| **Overall**                 |   88.64%   |   84.23%  |   84.69%  |   88.88%   |         -           |
+| **Core App**                |   100%     |   100%    |   100%    |   100%     |         -           |
+| **API Modules**             |   76.47%   |   90.00%  |   75.00%  |   80.00%   |      25-27          |
+| **Polygon API**             |   95.00%   |   85.71%  |   100%    |   94.87%   |    35, 166          |
+| **Components - Atoms**      |   86.66%   |   85.71%  |   100%    |   86.66%   |    83, 99           |
+| **Components - Molecules**  |   92.75%   |   96.47%  |   80.76%  |   92.53%   |         -           |
+| **Repositories**            |   93.75%   |   86.20%  |   100%    |   93.75%   |    106, 120         |
+| **ViewModels**              |   87.15%   |   84.21%  |   88.88%  |   87.15%   |      Various        |
+| **Screens**                 |   72.72%   |   68.42%  |   70.00%  |   74.19%   |    72-73, 181-184   |
+| **i18n**                    |   63.33%   |   33.33%  |   60.00%  |   63.33%   |    28-29, 38-39     |
+
+### Detailed Coverage Insights
+
+- **Highest Coverage**:
+   - Core App Modules (100%)
+   - Repositories (93.75%)
+   - Components - Molecules (92.75%)
+
+- **Areas for Improvement**:
+   - i18n Translations (0% coverage)
+   - Screens Module (72.72% coverage)
+   - Some i18n Modules (63.33% coverage)
+
+### Running Tests
 
 ```bash
+# Run all tests
 npm test
-```
-
-Test coverage report:
-```
--------------------------------|---------|----------|---------|---------|-------------------------------
-File                           | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
--------------------------------|---------|----------|---------|---------|-------------------------------
-All files                      |   77.28 |    69.61 |   73.46 |   77.32 |
- src/api                       |   76.47 |       80 |      75 |      80 |
-  apiClient.ts                 |   76.47 |       80 |      75 |      80 | 25-27
- src/api/polygon               |      70 |    57.14 |     100 |   69.23 | 22-49,81-84,166
- src/components/atoms          |   73.33 |    76.19 |     100 |   73.33 |
-  Button.tsx                   |   73.33 |    76.19 |     100 |   73.33 | 79,83,95,99
- src/components/molecules      |   89.85 |    82.35 |   73.07 |   89.55 |
-  ErrorView.tsx                |    100  |    100   |    100  |   100   |
-  SearchBar.tsx                |   85.71 |    85.71 |      60 |   85.71 | 100-101
-  SortFilterBar.tsx            |   73.68 |    77.08 |   58.33 |   73.68 | 60-70,105,145,224
-  StockDetailsBottomSheet.tsx  |    100  |    93.75 |    100  |   100   | 159
-  StockGridItem.tsx            |    100  |     75   |    100  |   100   | 48
-  StockListItem.tsx            |    100  |    87.50 |    100  |   100   | 59
- src/constants                 |    100  |    100   |    100  |   100   |
-  api.ts                       |    100  |    100   |    100  |   100   |
-  config.ts                    |    100  |    100   |    100  |   100   |
-  index.ts                     |    100  |    100   |    100  |   100   |
-  storage.ts                   |    100  |    100   |    100  |   100   |
-  ui.ts                        |    100  |    100   |    100  |   100   |
- src/features/language/screens |     90  |     50   |     80  |    90   | 33
- src/features/splash/screens   |    100  |    100   |    100  |   100   |
-  SplashScreen.tsx             |    100  |    100   |    100  |   100   |
- src/features/stocks/screens   |   60.6  |   52.63  |     40  |   61.29 | 61,66,72-73,101-104,150-151,181-184
- src/i18n                      |   63.33 |    33.33 |     60  |   63.33 | 
-  index.ts                     |   63.33 |    33.33 |     60  |   63.33 | 28-29,38-39,50,55,77-79,85-86
- src/i18n/translations         |     0   |     0    |     0   |    0    |
-  ar.ts                        |     0   |     0    |     0   |    0    |
-  en.ts                        |     0   |     0    |     0   |    0    |
- src/navigation                |    100  |      100 |    100  |   100   |
-  AppNavigator.tsx             |    100  |      100 |    100  |   100   |
-  types.ts                     |     0   |      0   |     0   |    0    |
- src/repositories              |   93.75 |     86.2 |    100  |   93.75 |
-  StocksRepository.ts          |   93.75 |     86.2 |    100  |   93.75 | 106,120
-  index.ts                     |     0   |      0   |     0   |    0    |
- src/theme                     |    100  |      100 |    100  |   100   |
-  colors.ts                    |    100  |      100 |    100  |   100   |
-  index.ts                     |     0   |      0   |     0   |    0    |
-  spacing.ts                   |    100  |      100 |    100  |   100   |
-  typography.ts                |    100  |      100 |    100  |   100   |
- src/utils                     |   53.48 |    36.36 |     40  |   53.48 | 43-44,64,75-86,97,108,143-146,157-162
-  caching.ts                   |   53.48 |    36.36 |     40  |   53.48 | 43-44,64,75-86,97,108,143-146,157-162
-  test-utils.tsx               |    100  |    100   |    100  |   100   |
- src/viewmodels                |   72.22 |    53.33 |    81.25 |   72.22 | 76-77,88-114,131,139-142,161,176-178,190-192
-  ExploreViewModel.ts          |   72.22 |    53.33 |    81.25 |   72.22 | 76-77,88-114,131,139-142,161,176-178,190-192
-  LanguageViewModel.ts         |   84.21 |       75 |    100  |   84.21 | 22-23,46
-  index.ts                     |     0   |      0   |     0   |    0    |
--------------------------------|---------|----------|---------|---------|-------------------------------
 ```
 
 ## 🧰 Project Structure
