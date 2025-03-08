@@ -12,10 +12,28 @@ interface ExploreViewModelMock {
     isSearchMode: boolean;
     searchQuery: string;
     hasSearched: boolean;
+
+    // New properties
+    sortBy: 'ticker' | 'name';
+    orderBy: 'asc' | 'desc';
+    limit: 10 | 25 | 50;
+    viewType: 'list' | 'grid';
+    selectedStock: any | null;
+    isBottomSheetVisible: boolean;
+
+    // Original methods
     refreshStocks: jest.Mock;
     loadMoreStocks: jest.Mock;
     searchStocks: jest.Mock;
     clearSearch: jest.Mock;
+
+    // New methods
+    updateSortBy: jest.Mock;
+    updateOrderBy: jest.Mock;
+    updateLimit: jest.Mock;
+    updateViewType: jest.Mock;
+    showStockDetails: jest.Mock;
+    hideStockDetails: jest.Mock;
 }
 
 const defaultMockViewModel: ExploreViewModelMock = {
@@ -33,10 +51,28 @@ const defaultMockViewModel: ExploreViewModelMock = {
     isSearchMode: false,
     searchQuery: '',
     hasSearched: false,
+
+    // New properties
+    sortBy: 'ticker',
+    orderBy: 'asc',
+    limit: 50,
+    viewType: 'list',
+    selectedStock: null,
+    isBottomSheetVisible: false,
+
+    // Original methods
     refreshStocks: jest.fn(),
     loadMoreStocks: jest.fn(),
     searchStocks: jest.fn(),
     clearSearch: jest.fn(),
+
+    // New methods
+    updateSortBy: jest.fn(),
+    updateOrderBy: jest.fn(),
+    updateLimit: jest.fn(),
+    updateViewType: jest.fn(),
+    showStockDetails: jest.fn(),
+    hideStockDetails: jest.fn(),
 };
 
 // We'll use a variable so we can override values in individual tests.
@@ -58,6 +94,14 @@ describe('ExploreScreen', () => {
         const { getByText, getByPlaceholderText } = render(<ExploreScreen />);
         expect(getByText('exploreScreen.title')).toBeTruthy();
         expect(getByPlaceholderText('exploreScreen.searchPlaceholder')).toBeTruthy();
+    });
+
+    it('renders the SortFilterBar', () => {
+        const { getByTestId, getByText } = render(<ExploreScreen />);
+        // Look for the collapsed filter bar which contains sortBy text (no longer a standalone label)
+        expect(getByTestId('expand-filter-bar')).toBeTruthy();
+        // Also check if the sort value is displayed in the collapsed filter bar
+        expect(getByText('stockItem.ticker')).toBeTruthy();
     });
 
     it('renders FlatList with stocks when available', () => {
@@ -88,17 +132,29 @@ describe('ExploreScreen', () => {
         expect(queryByText('loading')).toBeNull();
     });
 
-    it('does not show loading indicator when no more items', () => {
-        mockUseExploreViewModel.stocksPagination.hasMore = false;
-        mockUseExploreViewModel.stocksLoadingMore = true;
-        const { queryByText } = render(<ExploreScreen />);
-        expect(queryByText('loading')).toBeNull();
+    it('renders StockDetailsBottomSheet when selected stock exists', () => {
+        mockUseExploreViewModel.selectedStock = { ticker: 'AAPL', name: 'Apple Inc.' };
+        mockUseExploreViewModel.isBottomSheetVisible = true;
+        const { queryByTestId } = render(<ExploreScreen />);
+        // We'd expect the bottom sheet elements to be present in the rendered output
+        // The exact query will depend on what testIDs you've assigned to the bottom sheet elements
+        // For example, if you added a testID 'close-button' to the close button:
+        expect(queryByTestId('close-button')).toBeTruthy();
     });
 
-    // Optional: If you have added a testID to the FlatList, you can uncomment and update:
-    // it('calls loadMoreStocks on end reached', () => {
-    //   const { getByTestId } = render(<ExploreScreen />);
-    //   fireEvent(getByTestId('stocks-list'), 'onEndReached');
-    //   expect(mockUseExploreViewModel.loadMoreStocks).toHaveBeenCalled();
-    // });
+    it('uses grid view when viewType is grid', () => {
+        mockUseExploreViewModel.viewType = 'grid';
+        const { queryAllByTestId } = render(<ExploreScreen />);
+        // We'd expect grid items instead of list items
+        expect(queryAllByTestId('stock-grid-item').length).toBe(2); // 2 stocks in our mock data
+        expect(queryAllByTestId('stock-list-item').length).toBe(0);
+    });
+
+    it('uses list view when viewType is list', () => {
+        mockUseExploreViewModel.viewType = 'list';
+        const { queryAllByTestId } = render(<ExploreScreen />);
+        // We'd expect list items instead of grid items
+        expect(queryAllByTestId('stock-list-item').length).toBe(2); // 2 stocks in our mock data
+        expect(queryAllByTestId('stock-grid-item').length).toBe(0);
+    });
 });

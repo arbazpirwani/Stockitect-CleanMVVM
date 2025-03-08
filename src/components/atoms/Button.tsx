@@ -1,6 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, ViewStyle, TextStyle } from 'react-native';
-import { colors, typography, spacing, borderRadius, shadows } from '@/theme';
+import { colors, typography, spacing, borderRadius } from '@/theme';
 
 /**
  * Button component props
@@ -141,7 +141,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         minWidth: 120,
-        ...shadows.small,
     },
     text: {
         ...typography.button,
@@ -173,7 +172,6 @@ const styles = StyleSheet.create({
     disabledContainer: {
         backgroundColor: colors.light,
         opacity: 0.6,
-        ...shadows.small,
     },
     disabledText: {
         color: colors.text.secondary,

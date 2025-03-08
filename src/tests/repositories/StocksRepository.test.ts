@@ -37,7 +37,8 @@ describe('StocksRepository', () => {
             const result = await repository.getStocks();
 
             expect(caching.getCachedData).toHaveBeenCalled();
-            expect(stocksApi.fetchStocks).toHaveBeenCalledWith(50, null);
+            // Update expectation to include default values for new parameters
+            expect(stocksApi.fetchStocks).toHaveBeenCalledWith(50, null, 'ticker', 'asc');
             expect(caching.setCachedData).toHaveBeenCalled();
             expect(result.stocks).toEqual(mockStocks);
             expect(result.pagination.nextCursor).toBe('mock-cursor');
@@ -64,7 +65,8 @@ describe('StocksRepository', () => {
             const cursor = 'page-2-cursor';
             await repository.getStocks(50, cursor);
 
-            expect(stocksApi.fetchStocks).toHaveBeenCalledWith(50, cursor);
+            // Update expectation to include default values for new parameters
+            expect(stocksApi.fetchStocks).toHaveBeenCalledWith(50, cursor, 'ticker', 'asc');
             // Should not try to access cache when using cursor
             expect(caching.getCachedData).not.toHaveBeenCalled();
         });
@@ -87,8 +89,9 @@ describe('StocksRepository', () => {
         it('fetches search results from API when not in cache', async () => {
             const result = await repository.searchStocks('apple');
 
-            expect(caching.getCachedSearchResults).toHaveBeenCalledWith('apple');
-            expect(stocksApi.searchStocks).toHaveBeenCalledWith('apple', 50);
+            // Update expectation for the new cache key format
+            expect(caching.getCachedSearchResults).toHaveBeenCalledWith('apple_ticker_asc_50');
+            expect(stocksApi.searchStocks).toHaveBeenCalledWith('apple', 50, 'ticker', 'asc');
             expect(caching.setCachedSearchResults).toHaveBeenCalled();
             expect(result).toEqual(mockStocks);
         });

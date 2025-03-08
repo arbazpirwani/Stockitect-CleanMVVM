@@ -20,12 +20,33 @@ export default {
         noResults: 'لم يتم العثور على أسهم تطابق بحثك',
         retryButton: 'إعادة المحاولة',
         errorMessage: 'حدث خطأ أثناء جلب الأسهم',
+        sortBy: 'ترتيب حسب',
+        order: 'الاتجاه',
+        limit: 'الحد',
+        view: 'العرض',
+        filterOptions: 'خيارات التصفية والترتيب',
+        ascending: 'تصاعدي',
+        descending: 'تنازلي',
+        listView: 'قائمة',
+        gridView: 'شبكة',
     },
 
     // Stock item
     stockItem: {
         ticker: 'الرمز',
         name: 'الشركة',
+    },
+
+    // Stock details
+    stockDetails: {
+        details: 'التفاصيل',
+        tags: 'العلامات',
+        exchange: 'البورصة',
+        type: 'النوع',
+        marketCap: 'القيمة السوقية',
+        currency: 'العملة',
+        notAvailable: 'غير متوفر',
+        active: 'نشط',
     },
 
     // Errors

@@ -20,12 +20,33 @@ export default {
         noResults: 'No stocks found matching your search',
         retryButton: 'Retry',
         errorMessage: 'An error occurred while fetching stocks',
+        sortBy: 'Sort By',
+        order: 'Order',
+        limit: 'Limit',
+        view: 'View',
+        filterOptions: 'Filter & Sort Options',
+        ascending: 'Ascending',
+        descending: 'Descending',
+        listView: 'List',
+        gridView: 'Grid',
     },
 
     // Stock item
     stockItem: {
         ticker: 'Ticker',
         name: 'Company',
+    },
+
+    // Stock details
+    stockDetails: {
+        details: 'Details',
+        tags: 'Tags',
+        exchange: 'Exchange',
+        type: 'Type',
+        marketCap: 'Market Cap',
+        currency: 'Currency',
+        notAvailable: 'N/A',
+        active: 'Active',
     },
 
     // Errors

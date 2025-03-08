@@ -8,19 +8,23 @@ import {
     ActivityIndicator,
     RefreshControl,
 } from 'react-native';
-import {useTranslation} from 'react-i18next';
-import {colors, typography, spacing} from '@/theme';
-import {PAGINATION} from '@/constants';
+import { useTranslation } from 'react-i18next';
+import { colors, typography, spacing } from '@/theme';
+import { PAGINATION } from '@/constants';
 
-import {SearchBar} from '@/components/molecules/SearchBar';
-import {StockListItem} from '@/components/molecules/StockListItem';
-import {ErrorView} from '@/components/molecules/ErrorView';
+import { SearchBar } from '@/components/molecules/SearchBar';
+import { StockListItem } from '@/components/molecules/StockListItem';
+import { StockGridItem } from '@/components/molecules/StockGridItem';
+import { ErrorView } from '@/components/molecules/ErrorView';
+import { SortFilterBar } from '@/components/molecules/SortFilterBar';
+import { StockDetailsBottomSheet } from '@/components/molecules/StockDetailsBottomSheet';
 
 // Import our ViewModel
-import {useExploreViewModel} from '@/viewmodels';
+import { useExploreViewModel } from '@/viewmodels';
+import { Stock } from '@appTypes/stock';
 
 export const ExploreScreen: React.FC = () => {
-    const {t} = useTranslation();
+    const { t } = useTranslation();
 
     // Use the ViewModel
     const {
@@ -33,10 +37,23 @@ export const ExploreScreen: React.FC = () => {
         searchQuery,
         hasSearched,
 
+        sortBy,
+        orderBy,
+        limit,
+        viewType,
+        selectedStock,
+        isBottomSheetVisible,
+
         refreshStocks,
         loadMoreStocks,
         searchStocks,
-        clearSearch
+        clearSearch,
+        updateSortBy,
+        updateOrderBy,
+        updateLimit,
+        updateViewType,
+        showStockDetails,
+        hideStockDetails
     } = useExploreViewModel();
 
     // Handle search query change
@@ -55,6 +72,14 @@ export const ExploreScreen: React.FC = () => {
         if (!isSearchMode && stocksPagination.hasMore) {
             loadMoreStocks();
         }
+    };
+
+    // Render item based on view type
+    const renderStockItem = ({ item }: { item: Stock }) => {
+        if (viewType === 'grid') {
+            return <StockGridItem stock={item} onPress={showStockDetails} />;
+        }
+        return <StockListItem stock={item} onPress={showStockDetails} showExchange />;
     };
 
     // If there's an error, show the ErrorView
@@ -95,13 +120,29 @@ export const ExploreScreen: React.FC = () => {
                     onClear={handleSearchClear}
                     loading={isSearchMode && isLoading}
                 />
+
+                <SortFilterBar
+                    sortBy={sortBy}
+                    orderBy={orderBy}
+                    limit={limit}
+                    viewType={viewType}
+                    onSortByChange={updateSortBy}
+                    onOrderByChange={updateOrderBy}
+                    onLimitChange={updateLimit}
+                    onViewTypeChange={updateViewType}
+                />
             </View>
 
             <FlatList
                 data={displayedStocks}
                 keyExtractor={(item) => item.ticker}
-                renderItem={({item}) => <StockListItem stock={item}/>}
-                contentContainerStyle={styles.listContent}
+                renderItem={renderStockItem}
+                numColumns={viewType === 'grid' ? 2 : 1}
+                key={viewType} // This forces a re-render when changing view types
+                contentContainerStyle={[
+                    styles.listContent,
+                    viewType === 'grid' && styles.gridContent
+                ]}
                 onEndReached={handleEndReached}
                 onEndReachedThreshold={PAGINATION.END_REACHED_THRESHOLD}
                 ListEmptyComponent={() => {
@@ -147,6 +188,13 @@ export const ExploreScreen: React.FC = () => {
                     />
                 }
             />
+
+            {/* Bottom sheet for stock details */}
+            <StockDetailsBottomSheet
+                stock={selectedStock}
+                visible={isBottomSheetVisible}
+                onClose={hideStockDetails}
+            />
         </SafeAreaView>
     );
 };
@@ -159,23 +207,31 @@ const styles = StyleSheet.create({
     },
     header: {
         padding: spacing.m,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.stockItem.border,
+        paddingBottom: spacing.s,
+        backgroundColor: colors.secondary,
     },
     title: {
         ...typography.title,
         color: colors.text.primary,
-        marginBottom: spacing.s,
+        marginBottom: spacing.m,
+        textAlign: 'center',
+        fontSize: 22,
     },
     listContent: {
         padding: spacing.m,
         paddingBottom: spacing.xxl,
+        paddingTop: spacing.s,
+    },
+    gridContent: {
+        alignItems: 'stretch',
+        paddingHorizontal: spacing.s, // Smaller horizontal padding for grid
     },
     emptyContainer: {
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
         padding: spacing.xl,
+        marginTop: spacing.xl,
     },
     emptyText: {
         ...typography.body,
@@ -186,10 +242,12 @@ const styles = StyleSheet.create({
         padding: spacing.m,
         alignItems: 'center',
         justifyContent: 'center',
+        marginTop: spacing.s,
+        marginBottom: spacing.l,
     },
     loadingText: {
         ...typography.caption,
         color: colors.text.secondary,
         marginTop: spacing.xs,
-    }
+    },
 });

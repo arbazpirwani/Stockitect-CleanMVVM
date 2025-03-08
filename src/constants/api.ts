@@ -24,9 +24,24 @@ export const STOCK_FILTERS = {
     MARKET: 'stocks',
     EXCHANGE: 'XNAS', // "XNAS" is the primary exchange code for Nasdaq
     ACTIVE: true,
-    SORT: 'ticker',
-    SORT_ORDER: 'asc',
+    SORT: 'ticker', // Default sort field
+    SORT_ORDER: 'asc', // Default sort order
 };
+
+// Sort options
+export const SORT_OPTIONS = {
+    TICKER: 'ticker',
+    NAME: 'name',
+};
+
+// Order options
+export const ORDER_OPTIONS = {
+    ASC: 'asc',
+    DESC: 'desc',
+};
+
+// Limit options
+export const LIMIT_OPTIONS = [10, 25, 50];
 
 // Page size for stock listings
 export const DEFAULT_BATCH_SIZE = 50;

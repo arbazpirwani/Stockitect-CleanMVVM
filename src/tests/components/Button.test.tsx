@@ -1,13 +1,13 @@
 import React from 'react';
 import { render, fireEvent } from '@utils/test-utils';
 import { Button } from '@/components/atoms/Button';
+import { ActivityIndicator } from 'react-native';
 
 describe('Button component', () => {
     it('renders correctly with title', () => {
         const { getByText } = render(
             <Button title="Test Button" onPress={() => {}} />
         );
-
         expect(getByText('Test Button')).toBeTruthy();
     });
 
@@ -16,19 +16,20 @@ describe('Button component', () => {
         const { getByText } = render(
             <Button title="Pressable Button" onPress={onPressMock} />
         );
-
         fireEvent.press(getByText('Pressable Button'));
         expect(onPressMock).toHaveBeenCalledTimes(1);
     });
 
     it('shows loading indicator when loading prop is true', () => {
-        const { queryByText, toJSON } = render(
+        const { queryByText, UNSAFE_getByType } = render(
             <Button title="Loading Button" onPress={() => {}} loading={true} />
         );
 
+        // Check that the title is not visible
         expect(queryByText('Loading Button')).toBeNull();
-        const json = toJSON();
-        expect(json).toMatchSnapshot();
+
+        // Check that the ActivityIndicator is rendered
+        expect(UNSAFE_getByType(ActivityIndicator)).toBeTruthy();
     });
 
     it('is disabled when disabled prop is true', () => {

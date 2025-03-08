@@ -89,9 +89,16 @@ function extractCursorFromUrl(nextUrl: string | undefined): string | null {
  * Fetch a list of stocks from the NASDAQ exchange.
  * @param limit Number of stocks to fetch per page
  * @param cursor Optional cursor for pagination
+ * @param sortBy Field to sort by (ticker or name)
+ * @param sortOrder Sort direction (asc or desc)
  * @returns Promise with stocks array and pagination info
  */
-export async function fetchStocks(limit: number = 50, cursor?: string | null): Promise<{
+export async function fetchStocks(
+    limit: number = 50,
+    cursor?: string | null,
+    sortBy: string = 'ticker',
+    sortOrder: string = 'asc'
+): Promise<{
     stocks: Stock[];
     nextCursor: string | null;
 }> {
@@ -100,8 +107,8 @@ export async function fetchStocks(limit: number = 50, cursor?: string | null): P
             market: STOCK_FILTERS.MARKET,
             exchange: STOCK_FILTERS.EXCHANGE,
             active: STOCK_FILTERS.ACTIVE,
-            sort: STOCK_FILTERS.SORT,
-            order: STOCK_FILTERS.SORT_ORDER,
+            sort: sortBy,
+            order: sortOrder,
             limit,
             apiKey: POLYGON_API_KEY,
         };
@@ -126,8 +133,18 @@ export async function fetchStocks(limit: number = 50, cursor?: string | null): P
 
 /**
  * Search for stocks by query.
+ * @param query Search query
+ * @param limit Maximum number of results
+ * @param sortBy Field to sort by (ticker or name)
+ * @param sortOrder Sort direction (asc or desc)
+ * @returns Promise with stocks array
  */
-export async function searchStocks(query: string, limit: number = 50): Promise<Stock[]> {
+export async function searchStocks(
+    query: string,
+    limit: number = 50,
+    sortBy: string = 'ticker',
+    sortOrder: string = 'asc'
+): Promise<Stock[]> {
     if (!query.trim()) {
         return [];
     }
@@ -138,8 +155,8 @@ export async function searchStocks(query: string, limit: number = 50): Promise<S
                 exchange: STOCK_FILTERS.EXCHANGE,
                 active: STOCK_FILTERS.ACTIVE,
                 search: query,
-                sort: STOCK_FILTERS.SORT,
-                order: STOCK_FILTERS.SORT_ORDER,
+                sort: sortBy,
+                order: sortOrder,
                 limit,
                 apiKey: POLYGON_API_KEY,
             },

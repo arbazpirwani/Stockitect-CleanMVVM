@@ -1,14 +1,12 @@
 import React, { memo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
-import { useTranslation } from 'react-i18next';
 import { colors, typography, spacing, borderRadius } from '@/theme';
 import { Stock } from '@appTypes/stock';
 
-
 /**
- * StockListItem component props
+ * StockGridItem component props
  */
-interface StockListItemProps {
+interface StockGridItemProps {
     /**
      * Stock data to display
      */
@@ -23,35 +21,26 @@ interface StockListItemProps {
      * Optional additional container style
      */
     style?: ViewStyle;
-
-    /**
-     * Whether to show exchange info
-     * @default false
-     */
-    showExchange?: boolean;
 }
 
 /**
- * StockListItem component
+ * StockGridItem component
  *
- * Displays a single stock item with ticker and company name.
+ * Displays a single stock item in a grid cell format with ticker and company name.
  *
  * @example
  * ```tsx
- * <StockListItem
+ * <StockGridItem
  *   stock={{ ticker: 'AAPL', name: 'Apple Inc.' }}
  *   onPress={(stock) => console.log(`Selected ${stock.ticker}`)}
  * />
  * ```
  */
-export const StockListItem: React.FC<StockListItemProps> = memo(({
+export const StockGridItem: React.FC<StockGridItemProps> = memo(({
                                                                      stock,
                                                                      onPress,
                                                                      style,
-                                                                     showExchange = false,
                                                                  }) => {
-    const { t } = useTranslation();
-
     /**
      * Handle press event
      */
@@ -66,7 +55,7 @@ export const StockListItem: React.FC<StockListItemProps> = memo(({
             style={[styles.container, style]}
             onPress={handlePress}
             activeOpacity={onPress ? 0.7 : 1}
-            testID="stock-list-item"
+            testID="stock-grid-item"
         >
             <View style={styles.innerContainer}>
                 <View style={styles.tickerContainer}>
@@ -74,13 +63,9 @@ export const StockListItem: React.FC<StockListItemProps> = memo(({
                 </View>
 
                 <View style={styles.infoContainer}>
-                    <Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">
+                    <Text style={styles.name} numberOfLines={2} ellipsizeMode="tail">
                         {stock.name}
                     </Text>
-
-                    {showExchange && stock.exchange && (
-                        <Text style={styles.exchange}>{stock.exchange}</Text>
-                    )}
                 </View>
             </View>
         </TouchableOpacity>
@@ -89,46 +74,48 @@ export const StockListItem: React.FC<StockListItemProps> = memo(({
 
 const styles = StyleSheet.create({
     container: {
-        marginVertical: spacing.xs,
-        marginHorizontal: spacing.xs,
+        flex: 1,
+        margin: spacing.xs,
         borderRadius: borderRadius.medium,
+        height: 130,
     },
     innerContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        flex: 1,
         backgroundColor: colors.stockItem.background,
         borderRadius: borderRadius.medium,
         borderWidth: 1,
         borderColor: colors.stockItem.border,
-        padding: spacing.m,
+        padding: spacing.s,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     tickerContainer: {
         backgroundColor: colors.primary,
         borderRadius: borderRadius.small,
         paddingVertical: spacing.xs,
         paddingHorizontal: spacing.s,
-        minWidth: 70,
-        height: 36,
+        marginBottom: spacing.m,
         alignItems: 'center',
         justifyContent: 'center',
+        alignSelf: 'center',
+        minWidth: 80,
+        height: 40,
     },
     ticker: {
         ...typography.subtitle,
         color: colors.secondary,
         fontWeight: 'bold',
+        fontSize: 16,
     },
     infoContainer: {
-        flex: 1,
-        marginLeft: spacing.m,
+        alignItems: 'center',
         justifyContent: 'center',
+        paddingHorizontal: spacing.xs,
     },
     name: {
-        ...typography.body,
-        color: colors.text.primary,
-        marginBottom: spacing.xs,
-    },
-    exchange: {
         ...typography.caption,
-        color: colors.text.secondary,
+        color: colors.text.primary,
+        textAlign: 'center',
+        fontSize: 12,
     },
 });

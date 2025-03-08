@@ -76,81 +76,133 @@ describe('ExploreViewModel', () => {
 
         // Wait for the debounced update and check that searchStocks was called
         await waitFor(() => {
-            expect(stocksRepository.searchStocks).toHaveBeenCalledWith('apple');
+            expect(stocksRepository.searchStocks).toHaveBeenCalledWith(
+                'apple',
+                result.current.limit,
+                result.current.sortBy,
+                result.current.orderBy
+            );
             expect(result.current.searchResults).toEqual(mockStocks);
         });
     });
 
-    it('clears search when requested', async () => {
+    it('updates sorting options and reloads data', async () => {
         const { result } = renderHook(() => useExploreViewModel());
 
         // Wait for initial load
         await waitFor(() => expect(result.current.stocksLoading).toBe(false));
 
-        // Set search query
+        // Update sort by
         act(() => {
-            result.current.searchStocks('apple');
+            result.current.updateSortBy('name');
         });
 
-        // Advance timers for the debounced search update
-        act(() => {
-            jest.advanceTimersByTime(500);
+        // Wait for the update to trigger a reload
+        await waitFor(() => {
+            expect(stocksRepository.getStocks).toHaveBeenCalledWith(
+                expect.any(Number),
+                null,
+                'name',
+                'asc'
+            );
         });
 
-        // Wait for search results to update
-        await waitFor(() => expect(result.current.searchResults).toEqual(mockStocks));
-
-        // Clear search
+        // Update sort order
         act(() => {
-            result.current.clearSearch();
+            result.current.updateOrderBy('desc');
         });
 
-        // Verify that the search state is cleared
-        expect(result.current.searchQuery).toBe('');
-        expect(result.current.hasSearched).toBe(false);
-        expect(result.current.searchResults).toEqual([]);
+        // Wait for the update to trigger another reload
+        await waitFor(() => {
+            expect(stocksRepository.getStocks).toHaveBeenCalledWith(
+                expect.any(Number),
+                null,
+                'name',
+                'desc'
+            );
+        });
     });
 
-    it('loads more stocks when loadMoreStocks is called', async () => {
-        // Setup mock for the loadMore call to return different stocks
-        const nextPageStocks = [
-            { ticker: 'GOOG', name: 'Alphabet Inc.' },
-            { ticker: 'AMZN', name: 'Amazon.com Inc.' }
-        ];
-
-        const nextPagination = {
-            nextCursor: 'next-cursor',
-            hasMore: true
-        };
-
-        // First call returns first page, second call returns second page
-        (stocksRepository.getStocks as jest.Mock)
-            .mockResolvedValueOnce({
-                stocks: mockStocks,
-                pagination: mockPagination
-            })
-            .mockResolvedValueOnce({
-                stocks: nextPageStocks,
-                pagination: nextPagination
-            });
-
+    it('updates limit and reloads data', async () => {
         const { result } = renderHook(() => useExploreViewModel());
 
-        // Wait for initial load to complete
-        await waitFor(() => expect(result.current.stocks).toEqual(mockStocks));
+        // Wait for initial load
+        await waitFor(() => expect(result.current.stocksLoading).toBe(false));
 
-        // Call loadMoreStocks
+        // Update limit
         act(() => {
-            result.current.loadMoreStocks();
+            result.current.updateLimit(25);
         });
 
-        // Wait for the load more to complete
-        await waitFor(() => expect(result.current.stocksLoadingMore).toBe(false));
+        // Wait for the update to trigger a reload
+        await waitFor(() => {
+            expect(stocksRepository.getStocks).toHaveBeenCalledWith(
+                25,
+                null,
+                'ticker',
+                'asc'
+            );
+        });
+    });
 
-        // Verify the repository was called with the cursor
-        expect(stocksRepository.getStocks).toHaveBeenCalledWith(undefined, 'test-cursor');
+    it('toggles view type without reloading data', async () => {
+        const { result } = renderHook(() => useExploreViewModel());
 
-        // The original + next page stocks should now be in the state
-        expect(stocksRepository.deduplicateStocks).toHaveBeenCalled();
+        // Wait for initial load
+        await waitFor(() => expect(result.current.stocksLoading).toBe(false));
+
+        // Initial call count before updating view type
+        const initialCallCount = (stocksRepository.getStocks as jest.Mock).mock.calls.length;
+
+        // Update view type
+        act(() => {
+            result.current.updateViewType('grid');
+        });
+
+        // View type should be updated
+        expect(result.current.viewType).toBe('grid');
+
+        // But getStocks should not have been called again
+        expect((stocksRepository.getStocks as jest.Mock).mock.calls.length).toBe(initialCallCount);
+    });
+
+    it('shows and hides stock details bottom sheet', async () => {
+        const { result } = renderHook(() => useExploreViewModel());
+
+        // Wait for initial load
+        await waitFor(() => expect(result.current.stocksLoading).toBe(false));
+
+        // Initially the bottom sheet should be hidden
+        expect(result.current.isBottomSheetVisible).toBe(false);
+        expect(result.current.selectedStock).toBe(null);
+
+        // Show stock details
+        const stock = { ticker: 'AAPL', name: 'Apple Inc.' };
+        act(() => {
+            result.current.showStockDetails(stock);
+        });
+
+        // Bottom sheet should be visible with the selected stock
+        expect(result.current.isBottomSheetVisible).toBe(true);
+        expect(result.current.selectedStock).toEqual(stock);
+
+        // Hide stock details
+        act(() => {
+            result.current.hideStockDetails();
+        });
+
+        // Bottom sheet should be hidden
+        expect(result.current.isBottomSheetVisible).toBe(false);
+
+        // Selected stock should still be available during the animation
+        expect(result.current.selectedStock).not.toBeNull();
+
+        // Advance timer to simulate the animation delay
+        act(() => {
+            jest.advanceTimersByTime(300);
+        });
+
+        // Now the selected stock should be null
+        expect(result.current.selectedStock).toBeNull();
     });
 });

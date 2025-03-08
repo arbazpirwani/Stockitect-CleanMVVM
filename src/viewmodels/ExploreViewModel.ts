@@ -4,6 +4,14 @@ import { Stock } from '@/types/stock';
 import { ApiError, PaginationInfo } from '@/types/api';
 import { TIMING } from '@/constants';
 
+// Types for sort, order, and limit options
+export type SortOption = 'ticker' | 'name';
+export type OrderOption = 'asc' | 'desc';
+// Import limit options from constants
+import { LIMIT_OPTIONS } from '@/constants';
+export type LimitOption = typeof LIMIT_OPTIONS[number];
+export type ViewType = 'list' | 'grid';
+
 /**
  * ViewModel for the Explore screen
  */
@@ -25,10 +33,20 @@ export function useExploreViewModel() {
     const [searchError, setSearchError] = useState<ApiError | null>(null);
     const [hasSearched, setHasSearched] = useState(false);
 
+    // New state for filtering and view options
+    const [sortBy, setSortBy] = useState<SortOption>('ticker');
+    const [orderBy, setOrderBy] = useState<OrderOption>('asc');
+    const [limit, setLimit] = useState<LimitOption>(50);
+    const [viewType, setViewType] = useState<ViewType>('list');
+
+    // Selected stock for details view
+    const [selectedStock, setSelectedStock] = useState<Stock | null>(null);
+    const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
+
     // Load initial stocks
     useEffect(() => {
         loadStocks();
-    }, []);
+    }, [sortBy, orderBy, limit]); // Reload when these parameters change
 
     // Computed values
     const isSearchMode = searchQuery.trim().length > 0;
@@ -44,7 +62,12 @@ export function useExploreViewModel() {
         setStocksError(null);
 
         try {
-            const response = await stocksRepository.getStocks();
+            const response = await stocksRepository.getStocks(
+                limit,
+                null,
+                sortBy,
+                orderBy
+            );
 
             // Ensure there are no duplicates
             setStocks(stocksRepository.deduplicateStocks(response.stocks));
@@ -55,7 +78,7 @@ export function useExploreViewModel() {
         } finally {
             setStocksLoading(false);
         }
-    }, []);
+    }, [sortBy, orderBy, limit]);
 
     /**
      * Load more stocks (next page)
@@ -70,8 +93,10 @@ export function useExploreViewModel() {
 
         try {
             const response = await stocksRepository.getStocks(
-                undefined,
-                stocksPagination.nextCursor
+                limit,
+                stocksPagination.nextCursor,
+                sortBy,
+                orderBy
             );
 
             // Append new stocks to existing ones, remove duplicates
@@ -93,7 +118,10 @@ export function useExploreViewModel() {
         stocksLoadingMore,
         stocksError,
         stocksPagination.hasMore,
-        stocksPagination.nextCursor
+        stocksPagination.nextCursor,
+        sortBy,
+        orderBy,
+        limit
     ]);
 
     /**
@@ -119,7 +147,12 @@ export function useExploreViewModel() {
         setSearchQuery(query);
 
         try {
-            const results = await stocksRepository.searchStocks(query);
+            const results = await stocksRepository.searchStocks(
+                query,
+                limit,
+                sortBy,
+                orderBy
+            );
 
             // Ensure no duplicates in search results
             setSearchResults(stocksRepository.deduplicateStocks(results));
@@ -129,7 +162,7 @@ export function useExploreViewModel() {
         } finally {
             setSearchLoading(false);
         }
-    }, []);
+    }, [limit, sortBy, orderBy]);
 
     /**
      * Debounce the search to avoid too many API calls
@@ -159,8 +192,58 @@ export function useExploreViewModel() {
         setHasSearched(false);
     }, []);
 
+    /**
+     * Update sort option
+     */
+    const updateSortBy = useCallback((sort: SortOption) => {
+        setSortBy(sort);
+        // Stocks will reload due to the effect dependency
+    }, []);
+
+    /**
+     * Update order option
+     */
+    const updateOrderBy = useCallback((order: OrderOption) => {
+        setOrderBy(order);
+        // Stocks will reload due to the effect dependency
+    }, []);
+
+    /**
+     * Update limit option
+     */
+    const updateLimit = useCallback((newLimit: LimitOption) => {
+        setLimit(newLimit);
+        // Stocks will reload due to the effect dependency
+    }, []);
+
+    /**
+     * Update view type
+     */
+    const updateViewType = useCallback((type: ViewType) => {
+        setViewType(type);
+    }, []);
+
+    /**
+     * Show stock details in bottom sheet
+     */
+    const showStockDetails = useCallback((stock: Stock) => {
+        setSelectedStock(stock);
+        setIsBottomSheetVisible(true);
+    }, []);
+
+    /**
+     * Hide bottom sheet
+     */
+    const hideStockDetails = useCallback(() => {
+        setIsBottomSheetVisible(false);
+        // Keep the selected stock until animation completes
+        setTimeout(() => {
+            setSelectedStock(null);
+        }, 300);
+    }, []);
+
     return {
-        // State
+        // Original state
         stocks,
         stocksLoading,
         stocksLoadingMore,
@@ -176,10 +259,26 @@ export function useExploreViewModel() {
         isLoading,
         error,
 
-        // Actions
+        // New state
+        sortBy,
+        orderBy,
+        limit,
+        viewType,
+        selectedStock,
+        isBottomSheetVisible,
+
+        // Original actions
         refreshStocks,
         loadMoreStocks,
         searchStocks,
-        clearSearch
+        clearSearch,
+
+        // New actions
+        updateSortBy,
+        updateOrderBy,
+        updateLimit,
+        updateViewType,
+        showStockDetails,
+        hideStockDetails
     };
 }
