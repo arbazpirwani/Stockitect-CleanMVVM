@@ -1,10 +1,19 @@
 {
   "extends": "@react-native/typescript-config/tsconfig.json",
   "compilerOptions": {
+    // Skip checking all .d.ts files for faster builds
     "skipLibCheck": true,
-    "types": ["react-native", "jest"],
+
+    // Add "node" to recognize NodeJS globals like "process"
+    "types": ["react-native", "jest", "node"],
+
+    // Where TypeScript should look for type definitions
     "typeRoots": ["./src/types", "./node_modules/@types"],
+
+    // Set the root directory for resolving imports
     "baseUrl": ".",
+
+    // Configure your path aliases
     "paths": {
       "@/*": ["src/*"],
       "@components/*": ["src/components/*"],
@@ -22,6 +31,9 @@
       "@assets/*": ["assets/*"]
     }
   },
+  // Include your source files and setup script
   "include": ["src/**/*", "jest.setup.js"],
+
+  // Exclude anything that shouldn't be compiled by TypeScript
   "exclude": ["node_modules", "babel.config.js", "metro.config.js"]
 }

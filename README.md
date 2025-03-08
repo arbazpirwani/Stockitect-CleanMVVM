@@ -46,7 +46,7 @@ src/
 </p>
 
 ### Demo
-<p align="center"> <img src="./assets/demo/demo.gif" width="400" alt="Demo GIF" /> </p>
+<p align="center"> <img src="./assets/demo/demo.gif" width="200" alt="Demo GIF" /> </p>
 
 ## 🛠️ Tech Stack
 
@@ -121,16 +121,16 @@ Test coverage report:
 ----------------------|---------|----------|---------|---------|-------------------
 File                  | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
 ----------------------|---------|----------|---------|---------|-------------------
-All files             |    83.7 |    79.44 |   81.25 |   83.25 |
- api                  |    95.1 |    86.36 |     100 |    95.1 |
-  stocksApi.ts        |    95.1 |    86.36 |     100 |    95.1 | 45,137
- components           |    85.7 |    84.21 |   88.89 |   85.71 |
-  Button.tsx          |    94.7 |    87.50 |     100 |   94.74 | 88
-  SearchBar.tsx       |    83.3 |    77.78 |      75 |   83.33 | 49,69-72
- repositories         |   90.32 |       80 |      80 |   90.32 |
-  StocksRepository.ts |   90.32 |       80 |      80 |   90.32 | 47-49,70-72
- viewmodels           |   86.67 |    80.95 |      75 |   86.67 |
-  ExploreViewModel.ts |    87.5 |    81.82 |      80 |    87.5 | 84,96-98,121-123
+All files             |   76.62 |    60.95 |   74.28 |   76.87 |
+ api                  |   77.77 |    80.00 |     75  |   81.25 |
+  stocksApi.ts        |   65.38 |    31.25 |    100  |   65.38 | 
+ components           |   73.33 |    76.19 |    100  |   73.33 |
+  Button.tsx          |   94.7  |    87.50 |    100  |   94.74 | 88
+  SearchBar.tsx       |   83.3  |    77.78 |     75  |   83.33 | 49,69-72
+ repositories         |    92   |    81.25 |    100  |    92   |
+  StocksRepository.ts |    92   |    81.25 |    100  |    92   | 
+ viewmodels           |   80.82 |    78.57 |     90  |   80.82 |
+  ExploreViewModel.ts |   87.5  |    81.82 |     80  |   87.5  | 84,96-98,121-123
   LanguageViewModel.ts|   85.71 |       80 |   66.67 |   85.71 | 32-35
 ----------------------|---------|----------|---------|---------|-------------------
 ```

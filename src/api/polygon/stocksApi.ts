@@ -1,22 +1,13 @@
-import axios, { AxiosError, AxiosInstance } from 'axios';
+import { AxiosError } from 'axios';
 import { POLYGON_API_KEY } from '@env';
 import { PolygonTickersResponse, PolygonErrorResponse, ApiError } from '@/types/api';
 import { Stock } from '@/types/stock';
-import { API_BASE_URL, API_CONFIG, ENDPOINTS, STOCK_FILTERS } from '@/constants';
+import { ENDPOINTS, STOCK_FILTERS } from '@/constants';
+import axiosInstance from '@/api/apiClient'; // Updated to use new API client
 
-// Create a configured client.
-function createApiClient(): AxiosInstance {
-    return axios.create({
-        baseURL: API_BASE_URL,
-        timeout: API_CONFIG.TIMEOUT,
-        headers: { 'Content-Type': API_CONFIG.CONTENT_TYPE },
-    });
-}
-
-// Transforms thrown Axios errors into our `ApiError`.
 // Transforms thrown Axios errors into our `ApiError`.
 function handleApiError(error: any): never {
-    if (axios.isAxiosError(error)) {
+    if (error.isAxiosError) {
         const axiosError = error as AxiosError<PolygonErrorResponse>;
         if (axiosError.response) {
             const status = axiosError.response.status;
@@ -55,8 +46,6 @@ function handleApiError(error: any): never {
             } as ApiError;
         }
     }
-
-    // Default error case
     throw {
         message: 'An unexpected error occurred',
         originalError: error,
@@ -75,13 +64,11 @@ function mapTickerToStock(t: any): Stock {
 }
 
 /**
- * Fetch a list of stocks from the NASDAQ exchange
+ * Fetch a list of stocks from the NASDAQ exchange.
  */
 export async function fetchStocks(limit: number = 50): Promise<Stock[]> {
     try {
-        const client = createApiClient();
-
-        const response = await client.get<PolygonTickersResponse>(ENDPOINTS.TICKERS, {
+        const response = await axiosInstance.get<PolygonTickersResponse>(ENDPOINTS.TICKERS, {
             params: {
                 market: STOCK_FILTERS.MARKET,
                 exchange: STOCK_FILTERS.EXCHANGE,
@@ -89,11 +76,9 @@ export async function fetchStocks(limit: number = 50): Promise<Stock[]> {
                 sort: STOCK_FILTERS.SORT,
                 order: STOCK_FILTERS.SORT_ORDER,
                 limit,
-                // No offset parameter since we're not paginating
                 apiKey: POLYGON_API_KEY,
             },
         });
-
         return response.data.results.map(mapTickerToStock);
     } catch (error) {
         return handleApiError(error);
@@ -101,16 +86,14 @@ export async function fetchStocks(limit: number = 50): Promise<Stock[]> {
 }
 
 /**
- * Search for stocks by query
+ * Search for stocks by query.
  */
 export async function searchStocks(query: string, limit: number = 50): Promise<Stock[]> {
     if (!query.trim()) {
         return [];
     }
-
     try {
-        const client = createApiClient();
-        const response = await client.get<PolygonTickersResponse>(ENDPOINTS.TICKERS, {
+        const response = await axiosInstance.get<PolygonTickersResponse>(ENDPOINTS.TICKERS, {
             params: {
                 market: STOCK_FILTERS.MARKET,
                 exchange: STOCK_FILTERS.EXCHANGE,
@@ -122,7 +105,6 @@ export async function searchStocks(query: string, limit: number = 50): Promise<S
                 apiKey: POLYGON_API_KEY,
             },
         });
-
         return response.data.results.map(mapTickerToStock);
     } catch (error) {
         return handleApiError(error);
