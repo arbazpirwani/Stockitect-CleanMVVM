@@ -47,6 +47,7 @@ src/
 
 ### Demo
 <p align="center"> <img src="./assets/demo/demo.gif" width="400" alt="Demo GIF" /> </p>
+
 ## 🛠️ Tech Stack
 
 - **React Native** - Core framework
