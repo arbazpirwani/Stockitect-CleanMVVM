@@ -27,8 +27,9 @@ describe('StocksSearchViewModel', () => {
     });
 
     it('initializes with empty state', () => {
-        const { result } = renderHook(() => useStocksSearchViewModel(50, 'ticker', 'asc'));
-
+        const { result } = renderHook(() =>
+            useStocksSearchViewModel(50, 'ticker', 'asc')
+        );
         expect(result.current.searchResults).toEqual([]);
         expect(result.current.searchQuery).toBe('');
         expect(result.current.loading).toBe(false);
@@ -37,26 +38,28 @@ describe('StocksSearchViewModel', () => {
     });
 
     it('handles search query with debounce', async () => {
-        const { result } = renderHook(() => useStocksSearchViewModel(50, 'ticker', 'asc'));
-
-        // Enter search query
-        act(() => {
+        const { result } = renderHook(() =>
+            useStocksSearchViewModel(50, 'ticker', 'asc')
+        );
+        await act(async () => {
             result.current.searchStocks('apple');
         });
 
         // Initially the query should be set but no API call yet
         expect(result.current.searchQuery).toBe('apple');
+        // Before timers fire, API not called:
         expect(stocksRepository.searchStocks).not.toHaveBeenCalled();
-
-        // Fast-forward debounce timer
-        act(() => {
-            jest.advanceTimersByTime(500);
+        await act(async () => {
+            jest.runAllTimers();
         });
 
         // Now API should be called
         await waitFor(() => {
             expect(stocksRepository.searchStocks).toHaveBeenCalledWith(
-                'apple', 50, 'ticker', 'asc'
+                'apple',
+                50,
+                'ticker',
+                'asc'
             );
         });
 
@@ -66,18 +69,16 @@ describe('StocksSearchViewModel', () => {
     });
 
     it('clears search correctly', async () => {
-        const { result } = renderHook(() => useStocksSearchViewModel(50, 'ticker', 'asc'));
-
-        // Set up search state
-        act(() => {
+        const { result } = renderHook(() =>
+            useStocksSearchViewModel(50, 'ticker', 'asc')
+        );
+        await act(async () => {
             result.current.searchStocks('apple');
-            jest.advanceTimersByTime(500);
+            jest.runAllTimers();
         });
 
         await waitFor(() => expect(result.current.hasSearched).toBe(true));
-
-        // Clear search
-        act(() => {
+        await act(async () => {
             result.current.clearSearch();
         });
 
@@ -88,9 +89,9 @@ describe('StocksSearchViewModel', () => {
     });
 
     it('handles empty search query', () => {
-        const { result } = renderHook(() => useStocksSearchViewModel(50, 'ticker', 'asc'));
-
-        // Call with empty query
+        const { result } = renderHook(() =>
+            useStocksSearchViewModel(50, 'ticker', 'asc')
+        );
         act(() => {
             result.current.searchStocks('');
         });
@@ -103,13 +104,12 @@ describe('StocksSearchViewModel', () => {
     it('handles API errors', async () => {
         const apiError = { message: 'Search failed', code: 'SEARCH_ERROR' };
         (stocksRepository.searchStocks as jest.Mock).mockRejectedValueOnce(apiError);
-
-        const { result } = renderHook(() => useStocksSearchViewModel(50, 'ticker', 'asc'));
-
-        // Run search
-        act(() => {
+        const { result } = renderHook(() =>
+            useStocksSearchViewModel(50, 'ticker', 'asc')
+        );
+        await act(async () => {
             result.current.searchStocks('error');
-            jest.advanceTimersByTime(500);
+            jest.runAllTimers();
         });
 
         // Wait for error to be set
@@ -125,37 +125,24 @@ describe('StocksSearchViewModel', () => {
             ({ limit, sortBy, orderBy }) => useStocksSearchViewModel(limit, sortBy, orderBy),
             { initialProps: { limit: 50, sortBy: 'ticker', orderBy: 'asc' } }
         );
-
-        // Do initial search
-        act(() => {
+        await act(async () => {
             result.current.searchStocks('apple');
-            jest.advanceTimersByTime(500);
+            jest.runAllTimers();
         });
 
         await waitFor(() => expect(result.current.hasSearched).toBe(true));
-
-        // Verify API called with initial params
-        expect(stocksRepository.searchStocks).toHaveBeenCalledWith(
-            'apple', 50, 'ticker', 'asc'
-        );
-
-        // Clear calls
+        expect(stocksRepository.searchStocks).toHaveBeenCalledWith('apple', 50, 'ticker', 'asc');
         (stocksRepository.searchStocks as jest.Mock).mockClear();
-
-        // Re-render with new params
+        // Re-render with new parameters
         rerender({ limit: 25, sortBy: 'name', orderBy: 'desc' });
-
-        // Search again
-        act(() => {
+        await act(async () => {
             result.current.searchStocks('apple');
-            jest.advanceTimersByTime(500);
+            jest.runAllTimers();
         });
 
         // Verify API called with new params
         await waitFor(() => {
-            expect(stocksRepository.searchStocks).toHaveBeenCalledWith(
-                'apple', 25, 'name', 'desc'
-            );
+            expect(stocksRepository.searchStocks).toHaveBeenCalledWith('apple', 25, 'name', 'desc');
         });
     });
 });
