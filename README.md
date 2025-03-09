@@ -18,6 +18,7 @@ src/
 ├── features/    # Feature-specific screens
 ├── i18n/        # Internationalization
 ├── navigation/  # Navigation configuration
+├── providers/   # Context providers (i18n, etc.)
 ├── repositories/# Data repositories (bridge between API and ViewModels)
 ├── theme/       # Styling system
 ├── types/       # TypeScript type definitions
@@ -34,6 +35,7 @@ src/
 - **Clean UI** - Modern, responsive interface following design best practices
 - **Caching** - Smart caching system to reduce redundant API calls
 - **Offline Support** - Basic functionality when offline via cache
+- **Optimized Performance** - FlatList optimizations for smooth scrolling
 
 ## 📱Demo
 
@@ -73,10 +75,12 @@ src/
 
 2. Install dependencies:
    ```bash
-   npm install
+   npm install --legacy-peer-deps
    # or
-   yarn install
+   yarn install --legacy-peer-deps
    ```
+
+   > **Note:** This project uses the latest React 19 with React Native 0.78, which requires using the legacy peer deps flag during installation.
 
 3. Set up your Polygon.io API key:
     - Copy `.env.example` to `.env`
@@ -109,13 +113,13 @@ npx react-native run-android
 
 - **Test Suites**: 17 passed (17 total)
 - **Total Tests**: 128 passed (128 total)
-- **Total Test Time**: 2.263 seconds
+- **Total Test Time**: 5.686 seconds
 
 ### Test Coverage
 
 | Module                      | Statements | Branch    | Functions | Lines     | Key Uncovered Lines |
 |:----------------------------|:----------:|:---------:|:---------:|:----------:|:-------------------:|
-| **Overall**                 |   88.64%   |   84.23%  |   84.69%  |   88.88%   |         -           |
+| **Overall**                 |   87.55%   |   83.58%  |   84.00%  |   87.77%   |         -           |
 | **Core App**                |   100%     |   100%    |   100%    |   100%     |         -           |
 | **API Modules**             |   76.47%   |   90.00%  |   75.00%  |   80.00%   |      25-27          |
 | **Polygon API**             |   95.00%   |   85.71%  |   100%    |   94.87%   |    35, 166          |
@@ -123,20 +127,22 @@ npx react-native run-android
 | **Components - Molecules**  |   92.75%   |   96.47%  |   80.76%  |   92.53%   |         -           |
 | **Repositories**            |   93.75%   |   86.20%  |   100%    |   93.75%   |    106, 120         |
 | **ViewModels**              |   87.15%   |   84.21%  |   88.88%  |   87.15%   |      Various        |
-| **Screens**                 |   72.72%   |   68.42%  |   70.00%  |   74.19%   |    72-73, 181-184   |
+| **Screens**                 |   62.50%   |   65.00%  |   63.63%  |   63.15%   |    73-74, 80-83     |
 | **i18n**                    |   63.33%   |   33.33%  |   60.00%  |   63.33%   |    28-29, 38-39     |
+| **Providers**               |   100%     |   100%    |   100%    |   100%     |         -           |
 
 ### Detailed Coverage Insights
 
 - **Highest Coverage**:
-   - Core App Modules (100%)
-   - Repositories (93.75%)
-   - Components - Molecules (92.75%)
+    - Core App Modules (100%)
+    - Providers (100%)
+    - Polygon API (95%)
+    - Repositories (93.75%)
 
 - **Areas for Improvement**:
-   - i18n Translations (0% coverage)
-   - Screens Module (72.72% coverage)
-   - Some i18n Modules (63.33% coverage)
+    - i18n Translations (0% coverage)
+    - Screens Module (62.50% coverage)
+    - Some i18n Modules (63.33% coverage)
 
 ### Running Tests
 
@@ -151,6 +157,7 @@ npm test
 - **Feature-based Organization** - Code organized by feature rather than by type
 - **Dependency Injection** - Using dependency inversion for testable code
 - **Repository Pattern** - Abstracting data sources
+- **Provider Pattern** - Context providers for shared state and services
 
 ## 🌐 API Integration
 
