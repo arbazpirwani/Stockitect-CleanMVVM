@@ -14,13 +14,15 @@ module.exports = {
     '^@navigation/(.*)$': '<rootDir>/src/navigation/$1',
     '^@i18n/(.*)$': '<rootDir>/src/i18n/$1',
     '^@constants/(.*)$': '<rootDir>/src/constants/$1',
-    '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg)$': '<rootDir>/__mocks__/fileMock.js'
+    '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg)$': '<rootDir>/__mocks__/fileMock.js',
+    '^@react-native-community/netinfo$': '<rootDir>/__mocks__/@react-native-community/netinfo.ts'
+
   },
   transform: {
     '^.+\\.tsx?$': ['babel-jest', { configFile: './babel.config.js' }]
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(react-native|@react-native|react-native-vector-icons)/)'
+    'node_modules/(?!(react-native|@react-native|react-native-vector-icons|@react-native-community/netinfo)/)'
   ],
   testPathIgnorePatterns: [
     '<rootDir>/node_modules/',

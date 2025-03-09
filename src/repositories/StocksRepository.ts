@@ -159,8 +159,13 @@ export class StocksRepository {
      * @returns Promise<boolean> True if online, false if offline
      */
     private async isNetworkAvailable(): Promise<boolean> {
-        const state = await NetInfo.fetch();
-        return !!state.isConnected;
+        try {
+            const state = await NetInfo.fetch();
+            return state.isConnected ?? false;
+        } catch (error) {
+            console.error('Network availability check failed', error);
+            return false;
+        }
     }
 }
 

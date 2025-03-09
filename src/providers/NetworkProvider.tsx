@@ -1,8 +1,9 @@
+// src/providers/NetworkProvider.tsx
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import NetInfo from '@react-native-community/netinfo';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors, typography, spacing } from '@/theme';
 import { useTranslation } from 'react-i18next';
+import NetInfo, { NetInfoState, NetInfoSubscription } from '@react-native-community/netinfo';
 
 interface NetworkContextType {
     isConnected: boolean | null;
@@ -14,33 +15,59 @@ export const useNetwork = () => useContext(NetworkContext);
 
 interface NetworkProviderProps {
     children: React.ReactNode;
+    // Optional error handler for testing
+    onError?: (error: Error) => void;
 }
 
-export const NetworkProvider: React.FC<NetworkProviderProps> = ({ children }) => {
+export const NetworkProvider: React.FC<NetworkProviderProps> = ({
+                                                                    children,
+                                                                    onError
+                                                                }) => {
     const [isConnected, setIsConnected] = useState<boolean | null>(null);
     const [showOfflineBanner, setShowOfflineBanner] = useState(false);
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Subscribe to network status changes
-        const unsubscribe = NetInfo.addEventListener(state => {
-            setIsConnected(state.isConnected);
-            if (state.isConnected === false) {
+        let unsubscribe: NetInfoSubscription | null = null;
+
+        const checkNetworkStatus = async () => {
+            try {
+                const state = await NetInfo.fetch();
+
+                // Additional null check and fallback
+                const connectionStatus = state?.isConnected ?? false;
+
+                setIsConnected(connectionStatus);
+                setShowOfflineBanner(!connectionStatus);
+
+                // Subscribe to network state changes
+                unsubscribe = NetInfo.addEventListener(networkState => {
+                    const newConnectionStatus = networkState?.isConnected ?? false;
+                    setIsConnected(newConnectionStatus);
+                    setShowOfflineBanner(!newConnectionStatus);
+                });
+            } catch (error) {
+                // Use custom error handler if provided, otherwise fallback to console
+                if (onError) {
+                    onError(error instanceof Error ? error : new Error(String(error)));
+                } else if (process.env.NODE_ENV !== 'test') {
+                    console.error('Network status check failed', error);
+                }
+
+                setIsConnected(false);
                 setShowOfflineBanner(true);
-            } else if (state.isConnected === true) {
-                // Hide the banner after a short delay when connection is restored
-                setTimeout(() => setShowOfflineBanner(false), 2000);
             }
-        });
+        };
 
-        // Get initial network status
-        NetInfo.fetch().then(state => {
-            setIsConnected(state.isConnected);
-            setShowOfflineBanner(state.isConnected === false);
-        });
+        checkNetworkStatus();
 
-        return () => unsubscribe();
-    }, []);
+        // Cleanup subscription
+        return () => {
+            if (unsubscribe) {
+                unsubscribe();
+            }
+        };
+    }, [onError]);
 
     return (
         <NetworkContext.Provider value={{ isConnected }}>

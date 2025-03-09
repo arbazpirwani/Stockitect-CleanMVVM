@@ -111,38 +111,42 @@ npx react-native run-android
 
 ### Test Statistics
 
-- **Test Suites**: 17 passed (17 total)
-- **Total Tests**: 128 passed (128 total)
-- **Total Test Time**: 5.686 seconds
+- **Total Test Files**: 18
+- **Passing Tests**: ✅ All passing
 
-### Test Coverage
+| Metric | Count |
+|--------|-------|
+| Total Tests | 132 |
+| Passed Tests | 132 |
+| Obsolete Snapshots | 1 |
+| Test Duration | 2.643 s |
 
-| Module                      | Statements | Branch    | Functions | Lines     | Key Uncovered Lines |
-|:----------------------------|:----------:|:---------:|:---------:|:----------:|:-------------------:|
-| **Overall**                 |   87.55%   |   83.58%  |   84.00%  |   87.77%   |         -           |
-| **Core App**                |   100%     |   100%    |   100%    |   100%     |         -           |
-| **API Modules**             |   76.47%   |   90.00%  |   75.00%  |   80.00%   |      25-27          |
-| **Polygon API**             |   95.00%   |   85.71%  |   100%    |   94.87%   |    35, 166          |
-| **Components - Atoms**      |   86.66%   |   85.71%  |   100%    |   86.66%   |    83, 99           |
-| **Components - Molecules**  |   92.75%   |   96.47%  |   80.76%  |   92.53%   |         -           |
-| **Repositories**            |   93.75%   |   86.20%  |   100%    |   93.75%   |    106, 120         |
-| **ViewModels**              |   87.15%   |   84.21%  |   88.88%  |   87.15%   |      Various        |
-| **Screens**                 |   62.50%   |   65.00%  |   63.63%  |   63.15%   |    73-74, 80-83     |
-| **i18n**                    |   63.33%   |   33.33%  |   60.00%  |   63.33%   |    28-29, 38-39     |
-| **Providers**               |   100%     |   100%    |   100%    |   100%     |         -           |
+### Coverage Summary
+
+| Module                      | Statements | Branch   | Functions | Lines  | Key Uncovered Lines           |
+|-----------------------------|------------|----------|-----------|--------|-------------------------------|
+| **Overall**                 | 87.15%     | 84.21%   | 88.88%    | 87.15% | -                             |
+| **Core Components**         | 86.66%     | 85.71%   | 100%      | 86.66% | 83, 99                        |
+| **API Client**              | 76.47%     | 90.00%   | 75.00%    | 80.00% | 25-27                         |
+| **Stocks Repository**       | 86.04%     | 80.00%   | 100%      | 86.04% | 59,116,122,139                |
+| **Network Provider** *(new)*| 95.23%     | 75.00%   | 100%      | 95.23% | 53-54                         |
+| **Language Selection**      | 90.00%     | 50.00%   | 80.00%    | 90.00% | 77-79,85-86                   |
+| **Explore Screen**          | 65.11%     | 65.90%   | 63.63%    | 65.85% | 77-74,80-83                   |
+| **ViewModels**              | 87.15%     | 84.21%   | 88.88%    | 87.15% | Various                       |
+| **Internationalization**    | 63.33%     | 33.33%   | 60.00%    | 63.33% | 28-29,38-39,50,55,77-79,85-86 |
 
 ### Detailed Coverage Insights
 
 - **Highest Coverage**:
-    - Core App Modules (100%)
-    - Providers (100%)
-    - Polygon API (95%)
-    - Repositories (93.75%)
+    - Core Components (100%)
+    - Network Provider (95.23%)
+    - Language Selection (90.00%)
+    - Stocks Repository (86.04%)
 
 - **Areas for Improvement**:
-    - i18n Translations (0% coverage)
-    - Screens Module (62.50% coverage)
-    - Some i18n Modules (63.33% coverage)
+    - Internationalization (63.33% coverage)
+    - Explore Screen (65.11% coverage)
+    - API Client (76.47% coverage)
 
 ### Running Tests
 
