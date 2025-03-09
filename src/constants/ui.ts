@@ -21,6 +21,8 @@ export const DIMENSIONS = {
     SEARCH_BAR_HEIGHT: 44,
     LOGO_WIDTH: 200,
     LOGO_HEIGHT: 100,
+    LIST_ITEM_HEIGHT: 90,
+    GRID_ITEM_HEIGHT: 150,
 };
 
 // Pagination constants

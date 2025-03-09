@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useCallback} from 'react';
 import {
     View,
     FlatList,
@@ -8,23 +8,24 @@ import {
     ActivityIndicator,
     RefreshControl,
 } from 'react-native';
-import { useTranslation } from 'react-i18next';
-import { colors, typography, spacing } from '@/theme';
-import { PAGINATION } from '@/constants';
+import {useTranslation} from 'react-i18next';
+import {colors, typography, spacing} from '@/theme';
+import {PAGINATION} from '@/constants';
 
-import { SearchBar } from '@/components/molecules/SearchBar';
-import { StockListItem } from '@/components/molecules/StockListItem';
-import { StockGridItem } from '@/components/molecules/StockGridItem';
-import { ErrorView } from '@/components/molecules/ErrorView';
-import { SortFilterBar } from '@/components/molecules/SortFilterBar';
-import { StockDetailsBottomSheet } from '@/components/molecules/StockDetailsBottomSheet';
+import {SearchBar} from '@/components/molecules/SearchBar';
+import {StockListItem} from '@/components/molecules/StockListItem';
+import {StockGridItem} from '@/components/molecules/StockGridItem';
+import {ErrorView} from '@/components/molecules/ErrorView';
+import {SortFilterBar} from '@/components/molecules/SortFilterBar';
+import {StockDetailsBottomSheet} from '@/components/molecules/StockDetailsBottomSheet';
+import {DIMENSIONS} from '@/constants';
 
 // Import our ViewModel
-import { useExploreViewModel } from '@/viewmodels';
-import { Stock } from '@appTypes/stock';
+import {useExploreViewModel} from '@/viewmodels';
+import {Stock} from '@appTypes/stock';
 
 export const ExploreScreen: React.FC = () => {
-    const { t } = useTranslation();
+    const {t} = useTranslation();
 
     // Use the ViewModel
     const {
@@ -57,29 +58,38 @@ export const ExploreScreen: React.FC = () => {
     } = useExploreViewModel();
 
     // Handle search query change
-    const handleSearchChange = (text: string) => {
+    const handleSearchChange = useCallback((text: string) => {
         searchStocks(text);
-    };
+    }, [searchStocks]);
 
-    // Handle search clear
-    const handleSearchClear = () => {
+// Handle search clear
+    const handleSearchClear = useCallback(() => {
         clearSearch();
-    };
+    }, [clearSearch]);
 
-    // Handle load more when reaching end of list
-    const handleEndReached = () => {
+// Handle load more when reaching end of list
+    const handleEndReached = useCallback(() => {
         // Only load more if not in search mode and there are more items to load
         if (!isSearchMode && stocksPagination.hasMore) {
             loadMoreStocks();
         }
-    };
+    }, [isSearchMode, stocksPagination.hasMore, loadMoreStocks]);
+
+    // Handle refresh action
+    const handleRefresh = useCallback(() => {
+        if (isSearchMode) {
+            searchStocks(searchQuery);
+        } else {
+            refreshStocks();
+        }
+    }, [isSearchMode, searchQuery, searchStocks, refreshStocks]);
 
     // Render item based on view type
-    const renderStockItem = ({ item }: { item: Stock }) => {
+    const renderStockItem = ({item}: { item: Stock }) => {
         if (viewType === 'grid') {
-            return <StockGridItem stock={item} onPress={showStockDetails} />;
+            return <StockGridItem stock={item} onPress={showStockDetails}/>;
         }
-        return <StockListItem stock={item} onPress={showStockDetails} showExchange />;
+        return <StockListItem stock={item} onPress={showStockDetails} showExchange/>;
     };
 
     // If there's an error, show the ErrorView
@@ -145,6 +155,15 @@ export const ExploreScreen: React.FC = () => {
                 ]}
                 onEndReached={handleEndReached}
                 onEndReachedThreshold={PAGINATION.END_REACHED_THRESHOLD}
+                getItemLayout={(data, index) => ({
+                    length: viewType === 'grid' ? DIMENSIONS.GRID_ITEM_HEIGHT : DIMENSIONS.LIST_ITEM_HEIGHT, // Approximate height of items
+                    offset: (viewType === 'grid' ? DIMENSIONS.GRID_ITEM_HEIGHT : DIMENSIONS.LIST_ITEM_HEIGHT) * Math.floor(index / (viewType === 'grid' ? 2 : 1)),
+                    index,
+                })}
+                initialNumToRender={10}
+                maxToRenderPerBatch={10}
+                windowSize={10}
+                removeClippedSubviews={true}
                 ListEmptyComponent={() => {
                     // Show nothing while loading the first time, or a placeholder when done
                     if (isLoading && !displayedStocks.length) return null;
@@ -177,13 +196,7 @@ export const ExploreScreen: React.FC = () => {
                 refreshControl={
                     <RefreshControl
                         refreshing={isLoading && displayedStocks.length > 0}
-                        onRefresh={() => {
-                            if (isSearchMode) {
-                                searchStocks(searchQuery);
-                            } else {
-                                refreshStocks();
-                            }
-                        }}
+                        onRefresh={handleRefresh}
                         tintColor={colors.primary}
                     />
                 }
