@@ -1,7 +1,7 @@
-import {renderHook, act} from '@testing-library/react-hooks';
-import {waitFor} from '@testing-library/react-native';
-import {useExploreViewModel} from '@/viewmodels/ExploreViewModel';
-import {stocksRepository} from '@/repositories/StocksRepository';
+import { renderHook, act } from '@testing-library/react-hooks';
+import { waitFor } from '@testing-library/react-native';
+import { useExploreViewModel } from '@/viewmodels/ExploreViewModel';
+import { stocksRepository } from '@/repositories/StocksRepository';
 
 // Increase overall timeout if needed
 jest.setTimeout(15000);
@@ -17,8 +17,8 @@ jest.mock('@/repositories/StocksRepository', () => ({
 
 // Sample stock data
 const mockStocks = [
-    {ticker: 'AAPL', name: 'Apple Inc.'},
-    {ticker: 'MSFT', name: 'Microsoft Corporation'},
+    { ticker: 'AAPL', name: 'Apple Inc.' },
+    { ticker: 'MSFT', name: 'Microsoft Corporation' },
 ];
 
 // Sample pagination data
@@ -44,7 +44,7 @@ describe('ExploreViewModel', () => {
     });
 
     it('loads stocks on initialization', async () => {
-        const {result} = renderHook(() => useExploreViewModel());
+        const { result } = renderHook(() => useExploreViewModel());
 
         // Wait for initial load to complete
         await waitFor(() => expect(result.current.stocksLoading).toBe(false));
@@ -56,7 +56,7 @@ describe('ExploreViewModel', () => {
     });
 
     it('handles search query', async () => {
-        const {result} = renderHook(() => useExploreViewModel());
+        const { result } = renderHook(() => useExploreViewModel());
 
         // Wait for the initial load to complete
         await waitFor(() => expect(result.current.stocksLoading).toBe(false));
@@ -83,7 +83,7 @@ describe('ExploreViewModel', () => {
     });
 
     it('updates sorting options and reloads data', async () => {
-        const {result} = renderHook(() => useExploreViewModel());
+        const { result } = renderHook(() => useExploreViewModel());
 
         // Wait for initial load
         await waitFor(() => expect(result.current.stocksLoading).toBe(false));
@@ -123,7 +123,7 @@ describe('ExploreViewModel', () => {
     });
 
     it('updates limit and reloads data', async () => {
-        const {result} = renderHook(() => useExploreViewModel());
+        const { result } = renderHook(() => useExploreViewModel());
 
         // Wait for initial load
         await waitFor(() => expect(result.current.stocksLoading).toBe(false));
@@ -148,7 +148,7 @@ describe('ExploreViewModel', () => {
     });
 
     it('toggles view type without reloading data', async () => {
-        const {result} = renderHook(() => useExploreViewModel());
+        const { result } = renderHook(() => useExploreViewModel());
 
         // Wait for initial load
         await waitFor(() => expect(result.current.stocksLoading).toBe(false));
@@ -169,7 +169,7 @@ describe('ExploreViewModel', () => {
     });
 
     it('shows and hides stock details bottom sheet', async () => {
-        const {result} = renderHook(() => useExploreViewModel());
+        const { result } = renderHook(() => useExploreViewModel());
 
         // Wait for initial load
         await waitFor(() => expect(result.current.stocksLoading).toBe(false));
@@ -179,7 +179,7 @@ describe('ExploreViewModel', () => {
         expect(result.current.selectedStock).toBe(null);
 
         // Show stock details
-        const stock = {ticker: 'AAPL', name: 'Apple Inc.'};
+        const stock = { ticker: 'AAPL', name: 'Apple Inc.' };
         await act(async () => {
             result.current.showStockDetails(stock);
         });
@@ -208,7 +208,6 @@ describe('ExploreViewModel', () => {
         expect(result.current.selectedStock).toBeNull();
     });
 
-    // New tests to improve coverage
     it('handles API errors when loading stocks', async () => {
         // Mock repository to throw an error
         (stocksRepository.getStocks as jest.Mock).mockRejectedValue({
@@ -216,7 +215,7 @@ describe('ExploreViewModel', () => {
             code: 'ERROR_CODE'
         });
 
-        const {result} = renderHook(() => useExploreViewModel());
+        const { result } = renderHook(() => useExploreViewModel());
 
         // Wait for error to be set
         await waitFor(() => expect(result.current.stocksError).not.toBeNull());
@@ -229,7 +228,7 @@ describe('ExploreViewModel', () => {
     });
 
     it('handles API errors when loading more stocks', async () => {
-        const {result} = renderHook(() => useExploreViewModel());
+        const { result } = renderHook(() => useExploreViewModel());
 
         // Wait for initial load
         await waitFor(() => expect(result.current.stocksLoading).toBe(false));
@@ -254,8 +253,6 @@ describe('ExploreViewModel', () => {
         });
     });
 
-    // Rather than testing no API call with error,
-    // let's test that errors are correctly tracked
     it('tracks errors from API calls', async () => {
         // Mock API to throw an error
         const errorMessage = 'API Error';
@@ -264,7 +261,7 @@ describe('ExploreViewModel', () => {
             code: 'ERROR'
         });
 
-        const {result} = renderHook(() => useExploreViewModel());
+        const { result } = renderHook(() => useExploreViewModel());
 
         // Wait for initial load (may already have error)
         await waitFor(() => expect(result.current.stocksLoading).toBe(false));
@@ -283,7 +280,6 @@ describe('ExploreViewModel', () => {
         });
     });
 
-    // Test that pagination is respected
     it('respects hasMore flag from pagination', async () => {
         // Setup a hook with pagination that indicates no more pages
         (stocksRepository.getStocks as jest.Mock).mockResolvedValueOnce({
@@ -304,15 +300,14 @@ describe('ExploreViewModel', () => {
         expect(result.current.stocksPagination.nextCursor).toBeNull();
     });
 
-    // Simplify no more pages test
     it('respects pagination when no more pages', async () => {
         // Override the initial response to indicate no more pages
         (stocksRepository.getStocks as jest.Mock).mockResolvedValueOnce({
             stocks: mockStocks,
-            pagination: {nextCursor: null, hasMore: false}
+            pagination: { nextCursor: null, hasMore: false }
         });
 
-        const {result} = renderHook(() => useExploreViewModel());
+        const { result } = renderHook(() => useExploreViewModel());
 
         // Wait for initial load and verify hasMore is false
         await waitFor(() => expect(result.current.stocksLoading).toBe(false));
@@ -330,9 +325,8 @@ describe('ExploreViewModel', () => {
         expect(stocksRepository.getStocks).not.toHaveBeenCalled();
     });
 
-    // REVISED - Testing behavior with error state
     it('skips API calls to loadMoreStocks when there is an error', async () => {
-        const {result} = renderHook(() => useExploreViewModel());
+        const { result } = renderHook(() => useExploreViewModel());
 
         // Wait for initial load
         await waitFor(() => expect(result.current.stocksLoading).toBe(false));
@@ -366,6 +360,7 @@ describe('ExploreViewModel', () => {
         });
     });
 
+    // (continuing from where it left off)
     it('prevents loading more when no more pages', async () => {
         // Setup a hook with pagination that indicates no more pages
         (stocksRepository.getStocks as jest.Mock).mockResolvedValueOnce({
@@ -373,7 +368,7 @@ describe('ExploreViewModel', () => {
             pagination: {nextCursor: null, hasMore: false}
         });
 
-        const {result} = renderHook(() => useExploreViewModel());
+        const { result } = renderHook(() => useExploreViewModel());
 
         // Wait for initial load to complete with hasMore=false
         await waitFor(() => expect(result.current.stocksLoading).toBe(false));
@@ -392,7 +387,7 @@ describe('ExploreViewModel', () => {
     });
 
     it('handles API errors in search', async () => {
-        const {result} = renderHook(() => useExploreViewModel());
+        const { result } = renderHook(() => useExploreViewModel());
 
         // Wait for initial load
         await waitFor(() => expect(result.current.stocksLoading).toBe(false));
@@ -419,7 +414,7 @@ describe('ExploreViewModel', () => {
     });
 
     it('deduplicates stocks when loading more', async () => {
-        const {result} = renderHook(() => useExploreViewModel());
+        const { result } = renderHook(() => useExploreViewModel());
 
         // Wait for initial load
         await waitFor(() => expect(result.current.stocksLoading).toBe(false));
@@ -454,5 +449,200 @@ describe('ExploreViewModel', () => {
 
         // Verify stocks were updated with deduplicated result
         expect(result.current.stocks).toEqual(dedupResult);
+    });
+
+// New tests for the composite ViewModel pattern
+    it('properly coordinates between list and search ViewModels', async () => {
+        const { result } = renderHook(() => useExploreViewModel());
+
+        // Wait for initial load
+        await waitFor(() => expect(result.current.stocksLoading).toBe(false));
+
+        // Verify initial state shows list data
+        expect(result.current.isSearchMode).toBe(false);
+        expect(result.current.displayedStocks).toEqual(result.current.stocks);
+
+        // Initiate a search
+        await act(async () => {
+            result.current.searchStocks('apple');
+            jest.advanceTimersByTime(500);
+        });
+
+        // Verify we've switched to search mode
+        await waitFor(() => {
+            expect(result.current.isSearchMode).toBe(true);
+            expect(result.current.displayedStocks).toEqual(result.current.searchResults);
+        });
+
+        // Clear search
+        await act(async () => {
+            result.current.clearSearch();
+        });
+
+        // Verify we've switched back to list mode
+        expect(result.current.isSearchMode).toBe(false);
+        expect(result.current.displayedStocks).toEqual(result.current.stocks);
+    });
+
+    it('correctly handles refreshStocks based on search mode', async () => {
+        const { result } = renderHook(() => useExploreViewModel(true));
+
+        // Wait for initial load
+        await waitFor(() => expect(result.current.stocksLoading).toBe(false));
+
+        // Clear mocks to track new calls
+        (stocksRepository.getStocks as jest.Mock).mockClear();
+        (stocksRepository.searchStocks as jest.Mock).mockClear();
+
+        // Refresh in list mode
+        await act(async () => {
+            result.current.refreshStocks();
+        });
+
+        // Should call getStocks
+        expect(stocksRepository.getStocks).toHaveBeenCalled();
+        expect(stocksRepository.searchStocks).not.toHaveBeenCalled();
+
+        // Switch to search mode - we need to directly update the state
+        await act(async () => {
+            result.current.searchStocks('apple');
+        });
+
+        // We need to ensure the debounced search function is executed
+        // by advancing the timer and flushing any pending promises
+        await act(async () => {
+            jest.runAllTimers(); // More reliable than advanceTimersByTime
+        });
+
+        // Verify that the search mode is active
+        expect(result.current.isSearchMode).toBe(true);
+        expect(result.current.searchQuery).toBe('apple');
+
+        // Clear mocks again
+        (stocksRepository.getStocks as jest.Mock).mockClear();
+        (stocksRepository.searchStocks as jest.Mock).mockClear();
+
+        // Now refresh with search mode active
+        await act(async () => {
+            result.current.refreshStocks();
+        });
+
+        // Since we're manually triggering refreshStocks in search mode,
+        // it should now call searchStocks with the current query
+        expect(stocksRepository.searchStocks).toHaveBeenCalledWith(
+            'apple',
+            expect.any(Number),
+            expect.any(String),
+            expect.any(String)
+        );
+        expect(stocksRepository.getStocks).not.toHaveBeenCalled();
+    });
+
+    it('passes correct parameters from list ViewModel to search ViewModel', async () => {
+        const { result } = renderHook(() => useExploreViewModel());
+
+        // Wait for initial load
+        await waitFor(() => expect(result.current.stocksLoading).toBe(false));
+
+        // Update sort and limit
+        await act(async () => {
+            result.current.updateSortBy('name');
+            result.current.updateOrderBy('desc');
+            result.current.updateLimit(25);
+        });
+
+        // Wait for updates to complete and their effects to finish
+        await waitFor(() => expect(result.current.sortBy).toBe('name'));
+        await waitFor(() => expect(result.current.orderBy).toBe('desc'));
+        await waitFor(() => expect(result.current.limit).toBe(25));
+
+        // Clear search mocks
+        (stocksRepository.searchStocks as jest.Mock).mockClear();
+
+        // Now search and verify the updated parameters are used
+        await act(async () => {
+            result.current.searchStocks('apple');
+        });
+
+        // Important: Fast-forward the debounce timer
+        jest.runAllTimers();  // This works better than advanceTimersByTime in some cases
+
+        // Wait for the search to complete
+        await waitFor(() => {
+            expect(stocksRepository.searchStocks).toHaveBeenCalledWith(
+                'apple',
+                25,      // updated limit
+                'name',  // updated sort
+                'desc'   // updated order
+            );
+        });
+    });
+
+    it('maintains viewType state independently of data operations', async () => {
+        const { result } = renderHook(() => useExploreViewModel());
+
+        // Wait for initial load
+        await waitFor(() => expect(result.current.stocksLoading).toBe(false));
+
+        // Set view type to grid
+        await act(async () => {
+            result.current.updateViewType('grid');
+        });
+
+        // Do various operations
+        await act(async () => {
+            // Change sort
+            result.current.updateSortBy('name');
+
+            // Switch to search mode
+            result.current.searchStocks('apple');
+            jest.advanceTimersByTime(500);
+        });
+
+        // Verify view type is still grid
+        expect(result.current.viewType).toBe('grid');
+
+        // Clear search, should still be grid
+        await act(async () => {
+            result.current.clearSearch();
+        });
+
+        expect(result.current.viewType).toBe('grid');
+    });
+
+    it('properly maintains stock details state during mode changes', async () => {
+        const { result } = renderHook(() => useExploreViewModel());
+
+        // Wait for initial load
+        await waitFor(() => expect(result.current.stocksLoading).toBe(false));
+
+        // Select a stock
+        const stock = {ticker: 'AAPL', name: 'Apple Inc.'};
+        await act(async () => {
+            result.current.showStockDetails(stock);
+        });
+
+        // Verify stock details are showing
+        expect(result.current.isBottomSheetVisible).toBe(true);
+        expect(result.current.selectedStock).toEqual(stock);
+
+        // Switch to search mode
+        await act(async () => {
+            result.current.searchStocks('google');
+            jest.advanceTimersByTime(500);
+        });
+
+        // Stock details should still be visible
+        expect(result.current.isBottomSheetVisible).toBe(true);
+        expect(result.current.selectedStock).toEqual(stock);
+
+        // Clear search
+        await act(async () => {
+            result.current.clearSearch();
+        });
+
+        // Stock details should still be maintained
+        expect(result.current.isBottomSheetVisible).toBe(true);
+        expect(result.current.selectedStock).toEqual(stock);
     });
 });

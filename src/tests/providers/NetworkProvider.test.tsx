@@ -3,6 +3,7 @@ import { render, waitFor } from '@testing-library/react-native';
 import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
 import { Text, View } from 'react-native';
 import { NetworkProvider, useNetwork } from '@/providers/NetworkProvider';
+import {act} from "@testing-library/react-hooks";
 
 // Explicitly mock the entire NetInfo module
 jest.mock('@react-native-community/netinfo', () => ({
@@ -40,12 +41,13 @@ describe('NetworkProvider', () => {
 
         // Mock addEventListener to simulate callback
         (NetInfo.addEventListener as jest.Mock).mockImplementation(
-            (callback: (state: NetInfoState) => void) => {
-                callback({ isConnected: true } as NetInfoState);
+            (callback: (state: any) => void) => {
+                callback({ isConnected: true });
                 return () => {};
             }
         );
 
+        // Render the component
         const { getByTestId } = render(
             <NetworkProvider>
                 <TestConsumer />
@@ -57,7 +59,6 @@ describe('NetworkProvider', () => {
             expect(getByTestId('connection-status').props.children).toBe('Connected');
         });
     });
-
     it('shows offline banner when disconnected', async () => {
         // Mock NetInfo to return disconnected state
         (NetInfo.fetch as jest.Mock).mockResolvedValue({ isConnected: false });
