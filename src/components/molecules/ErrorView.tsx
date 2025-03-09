@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { useTranslation } from 'react-i18next';
-import { colors, typography, spacing } from '@/theme';
-import { Button } from '@components/atoms/Button';
+import {View, Text, StyleSheet} from 'react-native';
+import {useTranslation} from 'react-i18next';
+import {colors, typography, spacing} from '@/theme';
+import {Button} from '@components/atoms/Button';
+import Icon from "react-native-vector-icons/Ionicons";
 
 /**
  * ErrorView component props
@@ -22,6 +23,11 @@ interface ErrorViewProps {
      * Optional title for the error
      */
     title?: string;
+
+    /**
+     * Whether the error is related to network connectivity
+     */
+    isNetworkError?: boolean;
 }
 
 /**
@@ -41,12 +47,21 @@ export const ErrorView: React.FC<ErrorViewProps> = ({
                                                         message,
                                                         onRetry,
                                                         title,
+                                                        isNetworkError
                                                     }) => {
-    const { t } = useTranslation();
+    const {t} = useTranslation();
 
     return (
         <View style={styles.container}>
             <View style={styles.content}>
+                {isNetworkError && (
+                    <Icon
+                        name="cloud-offline"
+                        size={48}
+                        color={colors.warning}
+                        style={styles.icon}
+                    />
+                )}
                 {title && <Text style={styles.title}>{title}</Text>}
                 <Text style={styles.message}>{message}</Text>
                 <Button
@@ -84,5 +99,8 @@ const styles = StyleSheet.create({
     },
     button: {
         minWidth: 120,
+    },
+    icon: {
+        marginBottom: spacing.m,
     },
 });

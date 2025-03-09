@@ -1,15 +1,16 @@
-import { Stock } from '@/types/stock';
-import { ApiError, PaginationInfo } from '@/types/api';
-import { fetchStocks, searchStocks } from '@/api/polygon/stocksApi';
+import {Stock} from '@/types/stock';
+import {ApiError, PaginationInfo} from '@/types/api';
+import {fetchStocks, searchStocks} from '@/api/polygon/stocksApi';
 import {
     getCachedData,
     setCachedData,
     getCachedSearchResults,
     setCachedSearchResults
 } from '@/utils/caching';
-import { CACHE_KEYS } from '@/constants';
+import {CACHE_KEYS} from '@/constants';
 
-import { DEFAULT_BATCH_SIZE } from '@/constants';
+import {DEFAULT_BATCH_SIZE} from '@/constants';
+import NetInfo from "@react-native-community/netinfo";
 
 /**
  * Repository for managing stock data
@@ -52,8 +53,17 @@ export class StocksRepository {
                 }
             }
 
+            // Check network status before making API call
+            const isOnline = await this.isNetworkAvailable();
+            if (!isOnline) {
+                throw {
+                    message: 'No internet connection. Please check your network settings.',
+                    code: 'NETWORK_UNAVAILABLE'
+                } as ApiError;
+            }
+
             // Fetch from API if not in cache or fetching next page
-            const { stocks, nextCursor } = await fetchStocks(limit, cursor, sortBy, sortOrder);
+            const {stocks, nextCursor} = await fetchStocks(limit, cursor, sortBy, sortOrder);
 
             // Cache the results (only the first page)
             if (!cursor && stocks.length > 0) {
@@ -106,6 +116,15 @@ export class StocksRepository {
                 return cachedResults;
             }
 
+            // Check network status before making API call
+            const isOnline = await this.isNetworkAvailable();
+            if (!isOnline) {
+                throw {
+                    message: 'No internet connection. Please check your network settings.',
+                    code: 'NETWORK_UNAVAILABLE'
+                } as ApiError;
+            }
+
             // Fetch from API if not in cache
             const results = await searchStocks(query, limit, sortBy, sortOrder);
 
@@ -133,6 +152,15 @@ export class StocksRepository {
             map.set(stock.ticker, stock);
         }
         return Array.from(map.values());
+    }
+
+    /**
+     * Check if device is online
+     * @returns Promise<boolean> True if online, false if offline
+     */
+    private async isNetworkAvailable(): Promise<boolean> {
+        const state = await NetInfo.fetch();
+        return !!state.isConnected;
     }
 }
 

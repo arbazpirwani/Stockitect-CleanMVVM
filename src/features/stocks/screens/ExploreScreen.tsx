@@ -11,6 +11,7 @@ import {
 import {useTranslation} from 'react-i18next';
 import {colors, typography, spacing} from '@/theme';
 import {PAGINATION} from '@/constants';
+import { useNetwork } from '@/providers/NetworkProvider';
 
 import {SearchBar} from '@/components/molecules/SearchBar';
 import {StockListItem} from '@/components/molecules/StockListItem';
@@ -26,6 +27,8 @@ import {Stock} from '@appTypes/stock';
 
 export const ExploreScreen: React.FC = () => {
     const {t} = useTranslation();
+
+    const { isConnected } = useNetwork();
 
     // Use the ViewModel
     const {
@@ -94,6 +97,8 @@ export const ExploreScreen: React.FC = () => {
 
     // If there's an error, show the ErrorView
     if (error) {
+        const isNetworkError = error.code === 'NETWORK_UNAVAILABLE' || error.code === 'NETWORK_ERROR';
+
         return (
             <SafeAreaView style={styles.container}>
                 <View style={styles.header}>
@@ -114,6 +119,7 @@ export const ExploreScreen: React.FC = () => {
                             refreshStocks();
                         }
                     }}
+                    isNetworkError={isNetworkError}
                 />
             </SafeAreaView>
         );

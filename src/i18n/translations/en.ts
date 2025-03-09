@@ -53,6 +53,7 @@ export default {
     errors: {
         rateLimit: 'Rate limit exceeded. Please try again later.',
         networkError: 'Network error. Please check your connection.',
+        offline: 'You are offline. Some features may be unavailable.',
         generalError: 'Something went wrong. Please try again.',
     },
 };

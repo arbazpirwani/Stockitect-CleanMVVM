@@ -3,6 +3,7 @@ import { StatusBar } from 'react-native';
 import { AppNavigator } from '@/navigation/AppNavigator';
 import { colors } from '@/theme';
 import { I18nProvider } from '@/providers/I18nProvider';
+import { NetworkProvider } from '@/providers/NetworkProvider';
 
 /**
  * Main App component
@@ -13,11 +14,13 @@ import { I18nProvider } from '@/providers/I18nProvider';
 const App: React.FC = () => {
     return (
         <I18nProvider>
-            <StatusBar
-                barStyle="dark-content"
-                backgroundColor={colors.background}
-            />
-            <AppNavigator />
+            <NetworkProvider>
+                <StatusBar
+                    barStyle="dark-content"
+                    backgroundColor={colors.background}
+                />
+                <AppNavigator />
+            </NetworkProvider>
         </I18nProvider>
     );
 };
