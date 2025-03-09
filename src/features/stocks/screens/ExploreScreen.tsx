@@ -21,6 +21,7 @@ import {SortFilterBar} from '@/components/molecules/SortFilterBar';
 import {StockDetailsBottomSheet} from '@/components/molecules/StockDetailsBottomSheet';
 import {DIMENSIONS} from '@/constants';
 
+
 // Import our ViewModel
 import {useExploreViewModel} from '@/viewmodels';
 import {Stock} from '@appTypes/stock';
@@ -99,6 +100,11 @@ export const ExploreScreen: React.FC = () => {
     if (error) {
         const isNetworkError = error.code === 'NETWORK_UNAVAILABLE' || error.code === 'NETWORK_ERROR';
 
+        // Use t() to translate the error message
+        const errorMessage = error.message.startsWith('errors.')
+            ? t(error.message)
+            : error.message || t('errors.generalError');
+
         return (
             <SafeAreaView style={styles.container}>
                 <View style={styles.header}>
@@ -111,7 +117,7 @@ export const ExploreScreen: React.FC = () => {
                 </View>
 
                 <ErrorView
-                    message={error.message || t('exploreScreen.errorMessage')}
+                    message={errorMessage}
                     onRetry={() => {
                         if (isSearchMode) {
                             searchStocks(searchQuery);

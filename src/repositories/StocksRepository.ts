@@ -57,7 +57,7 @@ export class StocksRepository {
             const isOnline = await this.isNetworkAvailable();
             if (!isOnline) {
                 throw {
-                    message: 'No internet connection. Please check your network settings.',
+                    message: 'errors.networkUnavailable', // Use translation key
                     code: 'NETWORK_UNAVAILABLE'
                 } as ApiError;
             }
@@ -120,7 +120,7 @@ export class StocksRepository {
             const isOnline = await this.isNetworkAvailable();
             if (!isOnline) {
                 throw {
-                    message: 'No internet connection. Please check your network settings.',
+                    message: 'errors.networkUnavailable', // Use translation key
                     code: 'NETWORK_UNAVAILABLE'
                 } as ApiError;
             }
