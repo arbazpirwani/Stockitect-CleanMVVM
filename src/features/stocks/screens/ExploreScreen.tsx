@@ -155,15 +155,22 @@ export const ExploreScreen: React.FC = () => {
                 ]}
                 onEndReached={handleEndReached}
                 onEndReachedThreshold={PAGINATION.END_REACHED_THRESHOLD}
-                getItemLayout={(data, index) => ({
-                    length: viewType === 'grid' ? DIMENSIONS.GRID_ITEM_HEIGHT : DIMENSIONS.LIST_ITEM_HEIGHT, // Approximate height of items
-                    offset: (viewType === 'grid' ? DIMENSIONS.GRID_ITEM_HEIGHT : DIMENSIONS.LIST_ITEM_HEIGHT) * Math.floor(index / (viewType === 'grid' ? 2 : 1)),
-                    index,
-                })}
-                initialNumToRender={10}
-                maxToRenderPerBatch={10}
-                windowSize={10}
-                removeClippedSubviews={true}
+                getItemLayout={(data, index) => {
+                    if (viewType === 'grid') {
+                        // For grid view with 2 columns
+                        const length = DIMENSIONS.GRID_ITEM_HEIGHT;
+                        const offset = length * Math.floor(index / 2);
+                        return { length, offset, index };
+                    } else {
+                        // For list view
+                        const length = DIMENSIONS.LIST_ITEM_HEIGHT;
+                        return { length, offset: length * index, index };
+                    }
+                }}
+                initialNumToRender={20}
+                maxToRenderPerBatch={15}
+                windowSize={21}
+                removeClippedSubviews={false}
                 ListEmptyComponent={() => {
                     // Show nothing while loading the first time, or a placeholder when done
                     if (isLoading && !displayedStocks.length) return null;
